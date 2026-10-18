@@ -8,9 +8,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 st.set_page_config(page_title="Amiguinho Virtual", page_icon="🤖", layout="centered")
 
 # Variáveis do modelo
-# ATENÇÃO: Substitua 'COLOQUE_O_ID_DO_ARQUIVO_AQUI' pelo ID real do arquivo GGUF.
-# Para pegar o ID: clique com o botão direito no arquivo no Drive -> Gerar link -> copie a parte entre 'd/' e '/view'
-file_id = "1KLdCXc8s37SjmPENKbTntQB5VMFNSuEH" 
+file_id = "1KLdCXc8s37SjmPENKbTntQB5VMFNSuEH"
 file_name = "qwen2.5-1.5b-5yoModel-Q4_K_M.gguf"
 model_id = file_name
 diretorio_modelo = "."
@@ -20,11 +18,11 @@ diretorio_modelo = "."
 def download_model():
     if os.path.exists(file_name):
         return True
-    
-    if file_id == "1KLdCXc8s37SjmPENKbTntQB5VMFNSuEH":
+
+    if file_id == "COLOQUE_O_ID_DO_ARQUIVO_AQUI" or file_id == "":
         st.error("⚠️ Por favor, atualize o arquivo app.py com o ID real do modelo no Google Drive!")
         return False
-        
+
     try:
         gdown.download(id=file_id, output=file_name, quiet=False)
         return os.path.exists(file_name)
@@ -73,7 +71,7 @@ with st.spinner("Preparando a mágica... (pode demorar um pouquinho na primeira 
 if is_downloaded:
     with st.spinner("Acordando o amiguinho..."):
         tokenizer, pipe = load_model()
-    
+
     # Inicializa o histórico de chat
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -88,14 +86,14 @@ if is_downloaded:
         # Mostra a mensagem do usuário
         st.chat_message("user").markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
-        
+
         # Gera o prompt para o modelo
         prompt_gguf = tokenizer.apply_chat_template(
             st.session_state.messages,
             tokenize=False,
             add_generation_prompt=True
         )
-        
+
         # Resposta do modelo
         with st.chat_message("assistant"):
             with st.spinner("Pensando..."):
@@ -107,12 +105,12 @@ if is_downloaded:
                     return_full_text=False
                 )
                 resposta = output[0]['generated_text'].strip()
-                
+
                 # Remove tags de <pensamento> para a interface ficar limpa para as crianças
                 resposta_limpa = re.sub(r'<pensamento>.*?</pensamento>', '', resposta, flags=re.DOTALL).strip()
-                
+
                 st.markdown(resposta_limpa)
-        
+
         # Salva a resposta no histórico
         st.session_state.messages.append({"role": "assistant", "content": resposta_limpa})
 else:
