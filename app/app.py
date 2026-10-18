@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 import re
-import requests
 import gdown
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
@@ -9,41 +8,28 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 st.set_page_config(page_title="Amiguinho Virtual", page_icon="🤖", layout="centered")
 
 # Variáveis do modelo
-folder_url = "https://drive.google.com/drive/folders/1-bhER9VtKK7Gq9l94ME6DTo_uSjCmD1w?usp=sharing"
-file_name = "qwen2.5-1.5b-5yoModel-Q4_K_M.gguf" # Usando a versão recomendada
+# ATENÇÃO: Substitua 'COLOQUE_O_ID_DO_ARQUIVO_AQUI' pelo ID real do arquivo GGUF.
+# Para pegar o ID: clique com o botão direito no arquivo no Drive -> Gerar link -> copie a parte entre 'd/' e '/view'
+file_id = "1KLdCXc8s37SjmPENKbTntQB5VMFNSuEH" 
+file_name = "qwen2.5-1.5b-5yoModel-Q4_K_M.gguf"
 model_id = file_name
 diretorio_modelo = "."
 
-# Função de download com cache para não baixar toda vez que a tela recarregar
+# Função de download com cache
 @st.cache_resource(show_spinner=False)
 def download_model():
     if os.path.exists(file_name):
         return True
     
-    match = re.search(r'folders/([a-zA-Z0-9_-]+)', folder_url)
-    if not match:
+    if file_id == "1KLdCXc8s37SjmPENKbTntQB5VMFNSuEH":
+        st.error("⚠️ Por favor, atualize o arquivo app.py com o ID real do modelo no Google Drive!")
         return False
-    folder_id = match.group(1)
-    
-    try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(folder_url, headers=headers)
-        pattern = r'\["([a-zA-Z0-9_-]{25,35})","' + re.escape(file_name) + r'"'
-        matches = re.findall(pattern, response.text)
         
-        if not matches:
-            pattern_alt = r'"id":"([a-zA-Z0-9_-]{25,35})"[^"]*"name":"' + re.escape(file_name) + r'"'
-            matches = re.findall(pattern_alt, response.text)
-            
-        if matches:
-            file_id = matches[0]
-            gdown.download(id=file_id, output=file_name, quiet=False)
-            return True
-        else:
-            # Removido o fallback que baixava a pasta inteira
-            st.error(f"Arquivo '{file_name}' não encontrado diretamente na pasta.")
-            return False
+    try:
+        gdown.download(id=file_id, output=file_name, quiet=False)
+        return os.path.exists(file_name)
     except Exception as e:
+        st.error(f"Erro ao baixar o arquivo: {e}")
         return False
 
 # Função de carregamento do modelo com cache
@@ -64,7 +50,7 @@ def load_model():
 # Interface amigável
 st.title("🤖 Seu Amiguinho Virtual!")
 
-# Placeholder para imagem 200x200 (você pode substituir por um link ou arquivo local de um mascote)
+# Placeholder para imagem 200x200
 col1, col2 = st.columns([1, 4])
 with col1:
     st.image("https://placehold.co/200x200/ffcc00/ffffff?text=Mascote", width=100)
@@ -130,4 +116,4 @@ if is_downloaded:
         # Salva a resposta no histórico
         st.session_state.messages.append({"role": "assistant", "content": resposta_limpa})
 else:
-    st.error("Puxa, não consegui encontrar meus arquivos mágicos. Tente novamente mais tarde!")
+    st.error("Puxa, não consegui carregar meus arquivos mágicos. Verifique o ID do arquivo!")
