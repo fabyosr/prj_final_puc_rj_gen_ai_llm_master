@@ -40,8 +40,9 @@ def download_model():
             gdown.download(id=file_id, output=file_name, quiet=False)
             return True
         else:
-            os.system(f'gdown --folder {folder_id} -O .')
-            return os.path.exists(file_name)
+            # Removido o fallback que baixava a pasta inteira
+            st.error(f"Arquivo '{file_name}' não encontrado diretamente na pasta.")
+            return False
     except Exception as e:
         return False
 
