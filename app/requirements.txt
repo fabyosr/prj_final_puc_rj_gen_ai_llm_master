@@ -6,3 +6,4 @@ torchvision
 torchaudio
 gdown
 requests
+accelerate
