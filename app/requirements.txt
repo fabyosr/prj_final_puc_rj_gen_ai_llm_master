@@ -1,0 +1,8 @@
+streamlit
+transformers>=4.40.0
+gguf>=0.10.0
+torch
+torchvision
+torchaudio
+gdown
+requests
