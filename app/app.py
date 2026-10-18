@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import re
 import gdown
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from llama_cpp import Llama
 
 # Configuração inicial da página
 st.set_page_config(page_title="Amiguinho Virtual", page_icon="🤖", layout="centered")
@@ -10,8 +10,6 @@ st.set_page_config(page_title="Amiguinho Virtual", page_icon="🤖", layout="cen
 # Variáveis do modelo
 file_id = "1KLdCXc8s37SjmPENKbTntQB5VMFNSuEH"
 file_name = "qwen2.5-1.5b-5yoModel-Q4_K_M.gguf"
-model_id = file_name
-diretorio_modelo = "."
 
 # Função de download com cache
 @st.cache_resource(show_spinner=False)
@@ -20,7 +18,7 @@ def download_model():
         return True
 
     if file_id == "COLOQUE_O_ID_DO_ARQUIVO_AQUI" or file_id == "":
-        st.error("⚠️ Por favor, atualize o arquivo app.py com o ID real do modelo no Google Drive!")
+        st.error("⚠️ Por favor, atualize o arquivo app.py com o ID real do modelo!")
         return False
 
     try:
@@ -30,20 +28,17 @@ def download_model():
         st.error(f"Erro ao baixar o arquivo: {e}")
         return False
 
-# Função de carregamento do modelo com cache
+# Função de carregamento do modelo com cache (usando llama.cpp)
 @st.cache_resource(show_spinner=False)
 def load_model():
-    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-1.5B-Instruct")
-    model = AutoModelForCausalLM.from_pretrained(
-        diretorio_modelo,
-        gguf_file=model_id,
+    # O llama-cpp-python é otimizado e poupa muita RAM
+    llm = Llama(
+        model_path=file_name,
+        n_ctx=2048,  # Limite de contexto para não estourar a memória
+        n_threads=2, # Número de threads leve para o Streamlit Cloud
+        verbose=False
     )
-    pipe = pipeline(
-        "text-generation",
-        model=model,
-        tokenizer=tokenizer
-    )
-    return tokenizer, pipe
+    return llm
 
 # Interface amigável
 st.title("🤖 Seu Amiguinho Virtual!")
@@ -70,16 +65,19 @@ with st.spinner("Preparando a mágica... (pode demorar um pouquinho na primeira 
 
 if is_downloaded:
     with st.spinner("Acordando o amiguinho..."):
-        tokenizer, pipe = load_model()
+        llm = load_model()
 
     # Inicializa o histórico de chat
     if "messages" not in st.session_state:
-        st.session_state.messages = []
+        st.session_state.messages = [
+            {"role": "system", "content": "Você é um amiguinho virtual de 5 anos. Responda de forma simples, amigável e educativa."}
+        ]
 
     # Exibe as mensagens anteriores
     for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+        if message["role"] != "system":
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
 
     # Entrada de texto do usuário
     if prompt := st.chat_input("Digite sua perguntinha aqui..."):
@@ -87,24 +85,16 @@ if is_downloaded:
         st.chat_message("user").markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        # Gera o prompt para o modelo
-        prompt_gguf = tokenizer.apply_chat_template(
-            st.session_state.messages,
-            tokenize=False,
-            add_generation_prompt=True
-        )
-
         # Resposta do modelo
         with st.chat_message("assistant"):
             with st.spinner("Pensando..."):
-                output = pipe(
-                    prompt_gguf,
-                    max_new_tokens=250,
+                output = llm.create_chat_completion(
+                    messages=st.session_state.messages,
+                    max_tokens=250,
                     temperature=0.7,
-                    do_sample=True,
-                    return_full_text=False
                 )
-                resposta = output[0]['generated_text'].strip()
+                
+                resposta = output["choices"][0]["message"]["content"].strip()
 
                 # Remove tags de <pensamento> para a interface ficar limpa para as crianças
                 resposta_limpa = re.sub(r'<pensamento>.*?</pensamento>', '', resposta, flags=re.DOTALL).strip()
