@@ -1,3 +1,18 @@
 streamlit
-llama-cpp-python
 gdown
+--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+llama-cpp-python
+
+#streamlit
+#llama-cpp-python
+#gdown
+
+# streamlit
+# transformers>=4.40.0
+# gguf>=0.10.0
+# torch
+# torchvision
+# torchaudio
+# gdown
+# requests
+# accelerate
