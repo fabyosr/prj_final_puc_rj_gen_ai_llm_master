@@ -32,6 +32,7 @@ def load_model_and_stats():
     )
 
     # Captura RAM logo após carregar o modelo
+    process = psutil.Process(os.getpid())
     mem_after = process.memory_info().rss / (1024 * 1024)
     
     return llm_instance, mem_before, mem_after
