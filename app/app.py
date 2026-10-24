@@ -4,104 +4,85 @@ import re
 import gdown
 from llama_cpp import Llama
 
-# Configuração inicial da página
-st.set_page_config(page_title="Amiguinho Virtual", page_icon="🤖", layout="centered")
+# Configurações da página
+st.set_page_config(page_title="Seu Amiguinho Virtual!", page_icon="🤖", layout="centered")
 
 # Variáveis do modelo
 file_id = "1KLdCXc8s37SjmPENKbTntQB5VMFNSuEH"
 file_name = "qwen2.5-1.5b-5yoModel-Q4_K_M.gguf"
 
-# Função de download com cache
-@st.cache_resource(show_spinner=False)
-def download_model():
-    if os.path.exists(file_name):
-        return True
+# Função para formatar o pensamento na interface
+def formatar_resposta(texto):
+    # Substitui a tag <pensamento> por um bloco com visual bonito (fundo escuro, texto verde estilo terminal)
+    estilo_pensamento = r'''
+    <div style="background-color: #1e1e1e; color: #4af626; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.9em; margin-bottom: 15px; border-left: 4px solid #4af626; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);">
+        <span style="color: #ffffff; font-weight: bold; font-family: sans-serif;">🧠 Pensando:</span><br>
+        \1
+    </div>
+    '''
+    # Usa regex para encontrar e substituir todas as ocorrências
+    texto_formatado = re.sub(r'<pensamento>(.*?)</pensamento>', estilo_pensamento, texto, flags=re.DOTALL)
+    return texto_formatado
 
-    if file_id == "COLOQUE_O_ID_DO_ARQUIVO_AQUI" or file_id == "":
-        st.error("⚠️ Por favor, atualize o arquivo app.py com o ID real do modelo!")
-        return False
-
-    try:
-        gdown.download(id=file_id, output=file_name, quiet=False)
-        return os.path.exists(file_name)
-    except Exception as e:
-        st.error(f"Erro ao baixar o arquivo: {e}")
-        return False
-
-# Função de carregamento do modelo com cache (usando llama.cpp)
-@st.cache_resource(show_spinner=False)
+# 1. Download e Carregamento do modelo
+@st.cache_resource
 def load_model():
-    # O llama-cpp-python é otimizado e poupa muita RAM
-    llm = Llama(
+    if not os.path.exists(file_name):
+        with st.spinner("Baixando os arquivos mágicos do amiguinho... Isso pode demorar um pouquinho na primeira vez."):
+            gdown.download(id=file_id, output=file_name, quiet=False)
+    
+    return Llama(
         model_path=file_name,
-        n_ctx=2048,  # Limite de contexto para não estourar a memória
-        n_threads=2, # Número de threads leve para o Streamlit Cloud
+        n_ctx=2048,
+        n_threads=2, # Limita as threads para evitar sobrecarga no servidor gratuito
         verbose=False
     )
-    return llm
 
-# Interface amigável
+llm = load_model()
+
+# 2. Construindo a Interface Visual Amigável
 st.title("🤖 Seu Amiguinho Virtual!")
+st.write("Olá! Eu sou seu amiguinho inteligente! Adoro brincar de aprender coisas novas e responder suas curiosidades. O que você quer saber hoje?")
 
-# Placeholder para imagem 200x200
-col1, col2 = st.columns([1, 4])
-with col1:
-    st.image("https://placehold.co/200x200/ffcc00/ffffff?text=Mascote", width=100)
-with col2:
-    st.markdown("### Olá! Eu sou seu amiguinho inteligente! Adoro brincar de aprender coisas novas e responder suas curiosidades. O que você quer saber hoje?")
+# 3. Gerenciamento de Histórico
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-# Sugestões de perguntas
-with st.expander("💡 Ideias do que me perguntar:"):
-    st.markdown("""
-    - *Por que o céu é azul?*
-    - *Como os passarinhos conseguem voar?*
-    - *O que é um arco-íris?*
-    - *De onde vem a chuva?*
-    """)
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        if msg["role"] == "assistant":
+            st.markdown(formatar_resposta(msg["content"]), unsafe_allow_html=True)
+        else:
+            st.markdown(msg["content"])
 
-# Fluxo principal de carregamento
-with st.spinner("Preparando a mágica... (pode demorar um pouquinho na primeira vez)"):
-    is_downloaded = download_model()
+# 4. Campo de entrada e resposta
+if prompt := st.chat_input("Digite sua perguntinha aqui..."):
+    # Adiciona e exibe a mensagem do usuário
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-if is_downloaded:
-    with st.spinner("Acordando o amiguinho..."):
-        llm = load_model()
-
-    # Inicializa o histórico de chat
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "system", "content": "Você é um amiguinho virtual de 5 anos. Responda de forma simples, amigável e educativa."}
-        ]
-
-    # Exibe as mensagens anteriores
-    for message in st.session_state.messages:
-        if message["role"] != "system":
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
-
-    # Entrada de texto do usuário
-    if prompt := st.chat_input("Digite sua perguntinha aqui..."):
-        # Mostra a mensagem do usuário
-        st.chat_message("user").markdown(prompt)
-        st.session_state.messages.append({"role": "user", "content": prompt})
-
-        # Resposta do modelo
-        with st.chat_message("assistant"):
-            with st.spinner("Pensando..."):
-                output = llm.create_chat_completion(
-                    messages=st.session_state.messages,
-                    max_tokens=250,
-                    temperature=0.7,
-                )
-                
-                resposta = output["choices"][0]["message"]["content"].strip()
-
-                # Remove tags de <pensamento> para a interface ficar limpa para as crianças
-                resposta_limpa = re.sub(r'<pensamento>.*?</pensamento>', '', resposta, flags=re.DOTALL).strip()
-
-                st.markdown(resposta_limpa)
-
-        # Salva a resposta no histórico
-        st.session_state.messages.append({"role": "assistant", "content": resposta_limpa})
-else:
-    st.error("Puxa, não consegui carregar meus arquivos mágicos. Verifique o ID do arquivo!")
+    # Prepara a resposta do assistente
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        
+        # Configura o comportamento do modelo (persona de 5 anos)
+        system_msg = {"role": "system", "content": "Você é um amiguinho virtual de 5 anos. Responda de forma simples, amigável e educativa."}
+        llm_messages = [system_msg] + st.session_state.messages
+        
+        with st.spinner("Pensando..."):
+            output = llm.create_chat_completion(
+                messages=llm_messages,
+                max_tokens=250,
+                temperature=0.7,
+            )
+        
+        resposta = output["choices"][0]["message"]["content"].strip()
+        
+        # Formata a resposta exibindo o pensamento estilizado e a resposta final
+        resposta_formatada = formatar_resposta(resposta)
+        
+        message_placeholder.markdown(resposta_formatada, unsafe_allow_html=True)
+    
+    # Adiciona a resposta bruta ao histórico (para ser reformatada se a tela recarregar)
+    st.session_state.messages.append({"role": "assistant", "content": resposta})
