@@ -105,7 +105,8 @@ if prompt := st.chat_input("Digite sua perguntinha aqui..."):
     with st.chat_message("assistant"):
 
         system_msg = {"role": "system", "content": "Você é um amiguinho virtual de 5 anos. Responda de forma simples, amigável e educativa."}
-        llm_messages = [system_msg] + st.session_state.messages
+        # llm_messages = [system_msg] + st.session_state.messages
+        llm_messages = st.session_state.messages
 
         with st.spinner("Pensando..."):
             output = llm.create_chat_completion(
@@ -113,6 +114,8 @@ if prompt := st.chat_input("Digite sua perguntinha aqui..."):
                 max_tokens=250,
                 temperature=0.7,
             )
+
+         st.markdown(f'output:\n{output}')
 
         resposta = output["choices"][0]["message"]["content"].strip()
 
