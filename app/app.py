@@ -115,7 +115,7 @@ if prompt := st.chat_input("Digite sua perguntinha aqui..."):
                 temperature=0.7,
             )
 
-         st.markdown(f'output:\n{output}')
+        st.markdown(f'output:\n{output}')
 
         resposta = output["choices"][0]["message"]["content"].strip()
 
