@@ -68,6 +68,7 @@ st.title("🤖 Seu Amiguinho Virtual!")
 st.write("Olá! Eu sou seu amiguinho inteligente! Adoro brincar de aprender coisas novas e responder suas curiosidades. O que você quer saber hoje?")
 
 def exibir_mensagem_formatada(texto):
+    st.markdown(texto)
     """Separa os pensamentos da resposta final e exibe usando componentes do Streamlit."""
     # Encontra todos os blocos de pensamento
     pensamentos = re.findall(r'<pensamento>(.*?)</pensamento>', texto, flags=re.DOTALL)
