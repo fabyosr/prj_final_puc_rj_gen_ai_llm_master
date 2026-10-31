@@ -3,7 +3,36 @@ import os
 import re
 import gdown
 import psutil
+import shutil
 from llama_cpp import Llama
+
+def bytes_to_readable(num_bytes):
+    """Convert bytes to a human-readable format (GB, MB, etc.)."""
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if num_bytes < 1024:
+            return f"{num_bytes:.2f} {unit}"
+        num_bytes /= 1024
+    return f"{num_bytes:.2f} PB"
+
+def list_disk_space():
+    """List disk space for all mounted partitions."""
+    try:
+        partitions = psutil.disk_partitions(all=False)  # Only physical partitions
+        for p in partitions:
+            try:
+                usage = psutil.disk_usage(p.mountpoint)
+                st.sidebar.metric("Partition:", f" {p.device}")
+                st.sidebar.metric("Mountpoint:", f" {p.mountpoint}")
+                st.sidebar.metric("File system type:", f" {p.fstype}")
+                st.sidebar.metric("Total:", f" {bytes_to_readable(usage.total)}")
+                st.sidebar.metric("Used:", f" {bytes_to_readable(usage.used)}")
+                st.sidebar.metric("Free:", f" {bytes_to_readable(usage.free)}")
+                st.sidebar.metric("Usage:", f" {usage.percent:.2f}%")
+            except PermissionError:
+                print(f"Permission denied for partition: {p.device}")
+                print("-" * 40)
+    except Exception as e:
+        print(f"Error retrieving disk information: {e}")
 
 # Configurações da página
 st.set_page_config(page_title="Seu Amiguinho Virtual!", page_icon="🤖", layout="centered")
@@ -61,6 +90,7 @@ current_mem_mb = process_current.memory_info().rss / (1024 * 1024)
 st.sidebar.metric("Uso de RAM Atual (App+Modelo)", f"{current_mem_mb:.2f} MB")
 
 st.sidebar.caption("Nota: O `llama.cpp` utiliza MMAP. O sistema operacional aloca a RAM de forma dinâmica (sob demanda) baseado no tamanho do arquivo GGUF.")
+list_disk_space()
 # -------------------------------------
 
 # 2. Construindo a Interface Visual Amigável
