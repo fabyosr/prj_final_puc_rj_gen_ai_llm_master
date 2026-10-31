@@ -38,7 +38,7 @@ def list_disk_space():
 st.set_page_config(page_title="Seu Amiguinho Virtual!", page_icon="🤖", layout="centered")
 
 # Variáveis do modelo
-file_id = "1KLdCXc8s37SjmPENKbTntQB5VMFNSuEH"
+file_id = "1WhNjVh4TGXNj086_ELSG8taiUEOOVlb6" # "1KLdCXc8s37SjmPENKbTntQB5VMFNSuEH"
 #file_name = "qwen2.5-1.5b-5yoModel-Q4_K_M.gguf"
 #file_name = "qwen2.5-0.5b-child-f16.gguf"
 file_name = "qwen2.5-0.5b-child-Q4_K_M.gguf"
