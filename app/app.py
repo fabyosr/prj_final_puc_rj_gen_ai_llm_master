@@ -329,6 +329,7 @@ with st.sidebar:
         )
         temperature = st.slider("Temperatura", 0.0, 1.5, 0.7, 0.05)
         max_tokens = st.slider("Máx. de tokens", 50, 600, 250, 25)
+        context_window = st.slider("Context window messages", 0, 10, 5, 1)
         use_system = st.toggle(
             "Enviar system prompt",
             value=False,
@@ -468,7 +469,7 @@ if prompt := st.chat_input("Digite sua perguntinha aqui…"):
         st.markdown(prompt)
 
     # Só role/content vão para o modelo (o campo "meta" fica de fora)
-    llm_messages = [{"role": m["role"], "content": m["content"]} for m in history[-MAX_HISTORY_MSGS:]]
+    llm_messages = [{"role": m["role"], "content": m["content"]} for m in history[-context_window:]]
     st.markdown(f'llm_messages:\n {llm_messages}')
     if use_system:
         llm_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + llm_messages
