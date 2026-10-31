@@ -76,7 +76,7 @@ MODELS: list[ModelSpec] = [
     # ATENÇÃO: na lista original o Q2_K do 1.5B tinha o MESMO id do Q4_K_M.
     # Baixar assim geraria um arquivo "Q2_K" que na verdade é Q4_K_M e invalidaria a comparação.
     # Preencha com o id correto do Drive:
-    ModelSpec("1.5b-q2", "qwen2.5-1.5b-5yoModel-Q2_K.gguf", None,
+    ModelSpec("1.5b-q2", "qwen2.5-1.5b-5yoModel-Q2_K.gguf", "1I4MKo_b8QdbMSTqx6nhmkMKKsvoal2eA",
               _T72, _S15, "Quantização extrema 2 bits (Q2_K)", "Q2_K", 680),
 ]
 MODELS_BY_KEY = {m.key: m for m in MODELS}
