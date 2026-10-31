@@ -469,6 +469,7 @@ if prompt := st.chat_input("Digite sua perguntinha aqui…"):
 
     # Só role/content vão para o modelo (o campo "meta" fica de fora)
     llm_messages = [{"role": m["role"], "content": m["content"]} for m in history[-MAX_HISTORY_MSGS:]]
+    st.markdown(f'llm_messages:\n {llm_messages}')
     if use_system:
         llm_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + llm_messages
 
