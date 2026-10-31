@@ -312,9 +312,9 @@ with st.sidebar:
     selected_key = st.selectbox(
         "Modelo",
         options=[m.key for m in MODELS],
-        index=default_idx,
-        format_func=lambda k: ("✅ " if MODELS_BY_KEY[k].path.exists() else "☁️ ") + MODELS_BY_KEY[k].label,
-        help="✅ já está no disco · ☁️ ainda precisa ser baixado",
+        index=1,  # 0.5B Q4_K_M como padrão
+        key="selected_model",
+        format_func=lambda k: MODELS_BY_KEY[k].label,  # rótulo estático
     )
     spec = MODELS_BY_KEY[selected_key]
 
@@ -430,6 +430,7 @@ if not spec.path.exists() or manager.llm is None:
 # =============================================================================
 def render_message(content: str, meta: dict | None = None) -> None:
     """Mostra a resposta; <pensamento>…</pensamento> vai para um expander."""
+    st.markdown(f'content all: {content}\n')
     thoughts = re.findall(r"<pensamento>(.*?)</pensamento>", content, flags=re.DOTALL)
     answer = re.sub(r"<pensamento>.*?</pensamento>", "", content, flags=re.DOTALL).strip()
 
