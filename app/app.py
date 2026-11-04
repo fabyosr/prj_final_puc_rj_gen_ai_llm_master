@@ -59,6 +59,7 @@ class ModelSpec:
 
 _T14 = "Qwen2.5-14B-Instruct"
 _S05 = "Qwen2.5-0.5B-Instruct"
+_S15 = "Qwen2.5-1.5B-Instruct"
 _T72 = "Qwen2.5-72B-Instruct"
 _S15 = "Qwen2.5-1.5B-Instruct"
 
@@ -73,11 +74,15 @@ MODELS: list[ModelSpec] = [
               _T72, _S15, "FP16 (precisão original)", "FP16", 3100),
     ModelSpec("1.5b-q4", "qwen2.5-1.5b-5yoModel-Q4_K_M.gguf", "1KLdCXc8s37SjmPENKbTntQB5VMFNSuEH",
               _T72, _S15, "Quantização 4 bits (Q4_K_M)", "Q4_K_M", 990),
-    # ATENÇÃO: na lista original o Q2_K do 1.5B tinha o MESMO id do Q4_K_M.
-    # Baixar assim geraria um arquivo "Q2_K" que na verdade é Q4_K_M e invalidaria a comparação.
-    # Preencha com o id correto do Drive:
     ModelSpec("1.5b-q2", "qwen2.5-1.5b-5yoModel-Q2_K.gguf", "1I4MKo_b8QdbMSTqx6nhmkMKKsvoal2eA",
               _T72, _S15, "Quantização extrema 2 bits (Q2_K)", "Q2_K", 680),
+
+    ModelSpec("1.5b-f16", "qwen2.5-1.5b-child-f16.gguf", "12XajOl4i-GuMx7OcEnH4W71gDviBqsI3",
+              _T14, _S15, "FP16 (precisão original)", "FP16", 2880),
+    ModelSpec("1.5b-q4", "qwen2.5-1.5b-child-Q4_K_M.gguf", "1yTDiDxq7_CLWt54mHnTwXWNk0vsSYW4_",
+              _T14, _S15, "Quantização 4 bits (Q4_K_M)", "Q4_K_M", 940),
+    ModelSpec("1.5b-q2", "qwen2.5-1.5b-child-Q2_K.gguf", "1pP9TKyFnkr5_pbwIvci7o7wly0ZSiBS1",
+              _T14, _S15, "Quantização extrema 2 bits (Q2_K)", "Q2_K", 645),
 ]
 MODELS_BY_KEY = {m.key: m for m in MODELS}
 
@@ -329,7 +334,7 @@ with st.sidebar:
         )
         temperature = st.slider("Temperatura", 0.0, 1.5, 0.7, 0.05)
         max_tokens = st.slider("Máx. de tokens", 50, 600, 250, 25)
-        context_window = st.slider("Context window messages", 0, 10, 5, 1)
+        max_msg_history = st.slider("Max message history", 1, 10, 5, 1)
         use_system = st.toggle(
             "Enviar system prompt",
             value=False,
@@ -469,7 +474,7 @@ if prompt := st.chat_input("Digite sua perguntinha aqui…"):
         st.markdown(prompt)
 
     # Só role/content vão para o modelo (o campo "meta" fica de fora)
-    llm_messages = [{"role": m["role"], "content": m["content"]} for m in history[-context_window:]]
+    llm_messages = [{"role": m["role"], "content": m["content"]} for m in history[-max_msg_history:]]
     st.markdown(f'llm_messages:\n {llm_messages}')
     if use_system:
         llm_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + llm_messages
