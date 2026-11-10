@@ -99,20 +99,24 @@ MODELS: list[ModelSpec] = [
     ModelSpec("1.5b-q2", "qwen2.5-1.5b-5yoModel-Q2_K.gguf", "1I4MKo_b8QdbMSTqx6nhmkMKKsvoal2eA",
               _T72, _S15, "Quantização extrema 2 bits (Q2_K)", "Q2_K", 680, 'Quantização Teacher 4bit'),
 
-    ModelSpec("1.5b-14b-f16", "qwen2.5-1.5b-child-f16.gguf", "1PH_ckBYpAIGbVLa5V4d0dKYUYUf-rzng",
+    ModelSpec("1.5b-14b-f16", "qwen2.5-1.5b-child-f16.gguf", "18vMxpgQla91yhx1BqJxJvueGxW8LWyH5",
               _T14, _S15, "FP16 (precisão original)", "FP16", 2880, 'Quantização Teacher 8bit'),
-    ModelSpec("1.5b-14b-q8", "qwen2.5-1.5b-child-Q8_0.gguf", "1d-3nSQh9HSouRfXcUdFDb5hK5KjoOPto",
+    ModelSpec("1.5b-14b-q8", "qwen2.5-1.5b-child-Q8_0.gguf", "1j-u346JH6a4D7ZMLw82vW4yF3C38VO1y",
               _T14, _S15, "Quantização 8 bits (Q8_0)", "Q8_0", 1536, 'Quantização Teacher 8bit'),
-    ModelSpec("1.5b-14b-q4", "qwen2.5-1.5b-child-Q4_K_M.gguf", "1bihK-Rvd4WzQnYzqL-lM8Cpy5ebNodYu",
+
+    ModelSpec("1.5b-14b-q8", "qwen2.5-1.5b-child-Q5_K_M.gguf", "1Tf6x4a2BSCIVkMRwfIah7yBcdDZrPgET",
+              _T14, _S15, "Quantização 8 bits (Q5_K_M)", "Q5_K_M", 1000, 'Quantização Teacher 8bit'),
+
+    ModelSpec("1.5b-14b-q4", "qwen2.5-1.5b-child-Q4_K_M.gguf", "11W7iqggrl7V6gffeTLfInUZzts1k3_OH",
               _T14, _S15, "Quantização 4 bits (Q4_K_M)", "Q4_K_M", 940, 'Quantização Teacher 8bit'),
 
-    ModelSpec("1.5b-14b-q3", "qwen2.5-1.5b-child-Q3_K_L.gguf", "1prfghf027aPnSZZhbdH-xPqxesF_KIOR",
+    ModelSpec("1.5b-14b-q3", "qwen2.5-1.5b-child-Q3_K_L.gguf", "135ZaSOMG4aZCl3mn3KxDBbl41FyBDVKF",
               _T14, _S15, "Quantização 3 bits (Q3_K_L)", "Q3_K_L", 839, 'Quantização Teacher 8bit'),
 
-    ModelSpec("1.5b-14b-q3", "qwen2.5-1.5b-child-Q3_K_M.gguf", "1At-JYdMH16wZnSB6bxVB8LnxXuk8-N81",
+    ModelSpec("1.5b-14b-q3", "qwen2.5-1.5b-child-Q3_K_M.gguf", "19kH3iq4fpH7GEgiG0IA3PvVHDebaa4sB",
               _T14, _S15, "Quantização 3 bits (Q3_K_M)", "Q3_K_M", 786, 'Quantização Teacher 8bit'),
     
-    ModelSpec("1.5b-14b-q2", "qwen2.5-1.5b-child-Q2_K.gguf", "1KCMM_zBh5ktzmc9u5qneCphrTD6Bgp8Q",
+    ModelSpec("1.5b-14b-q2", "qwen2.5-1.5b-child-Q2_K.gguf", "1m6PsJn9aL1cDLDtPsOTyBxAo4oaatT8d",
               _T14, _S15, "Quantização extrema 2 bits (Q2_K)", "Q2_K", 645, 'Quantização Teacher 8bit'),
 ]
 MODELS_BY_KEY = {m.key: m for m in MODELS}
