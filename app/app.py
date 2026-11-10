@@ -104,13 +104,13 @@ MODELS: list[ModelSpec] = [
     ModelSpec("1.5b-14b-q8", "qwen2.5-1.5b-child-Q8_0.gguf", "1j-u346JH6a4D7ZMLw82vW4yF3C38VO1y",
               _T14, _S15, "Quantização 8 bits (Q8_0)", "Q8_0", 1536, 'Quantização Teacher 8bit'),
 
-    ModelSpec("1.5b-14b-q8", "qwen2.5-1.5b-child-Q5_K_M.gguf", "1Tf6x4a2BSCIVkMRwfIah7yBcdDZrPgET",
+    ModelSpec("1.5b-14b-q5", "qwen2.5-1.5b-child-Q5_K_M.gguf", "1Tf6x4a2BSCIVkMRwfIah7yBcdDZrPgET",
               _T14, _S15, "Quantização 8 bits (Q5_K_M)", "Q5_K_M", 1000, 'Quantização Teacher 8bit'),
 
     ModelSpec("1.5b-14b-q4", "qwen2.5-1.5b-child-Q4_K_M.gguf", "11W7iqggrl7V6gffeTLfInUZzts1k3_OH",
               _T14, _S15, "Quantização 4 bits (Q4_K_M)", "Q4_K_M", 940, 'Quantização Teacher 8bit'),
 
-    ModelSpec("1.5b-14b-q3", "qwen2.5-1.5b-child-Q3_K_L.gguf", "135ZaSOMG4aZCl3mn3KxDBbl41FyBDVKF",
+    ModelSpec("1.5b-14b-q3l", "qwen2.5-1.5b-child-Q3_K_L.gguf", "135ZaSOMG4aZCl3mn3KxDBbl41FyBDVKF",
               _T14, _S15, "Quantização 3 bits (Q3_K_L)", "Q3_K_L", 839, 'Quantização Teacher 8bit'),
 
     ModelSpec("1.5b-14b-q3", "qwen2.5-1.5b-child-Q3_K_M.gguf", "19kH3iq4fpH7GEgiG0IA3PvVHDebaa4sB",
