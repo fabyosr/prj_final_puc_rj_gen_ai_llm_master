@@ -16,6 +16,7 @@ Trabalho apresentado ao curso [GenAI e LLM MASTER](https://ica.ele.puc-rio.br/cu
 - [Link para o código de treinamento (notebook)](https://github.com/fabyosr/prj_final_puc_rj_gen_ai_llm_master/blob/main/Child_Model_KNOWLEDGE_DISTILLATION_vFinal.ipynb)
 - [Aplicativo de comparação de modelos (`app.py`)](https://github.com/fabyosr/prj_final_puc_rj_gen_ai_llm_master/blob/main/app/app.py)
 - [Modelos GGUF](#23-matriz-de-modelos) (hospedados no Google Drive e baixados sob demanda pelo aplicativo)
+- 🚀 **Demo online:** [Acesse a aplicação no Streamlit Cloud](https://prj-final-puc-rj-gen-ai-llm-master-kgusbqzlwgeggkhszuzqre.streamlit.app/)
 
 ---
 
