@@ -541,11 +541,11 @@ with st.sidebar:
         temperature = st.slider("Temperatura", 0.0, 1.5, 0.7, 0.05)
         max_tokens = st.slider("Máx. de tokens", 50, 600, 250, 25)
         max_msg_history = st.slider("Max message history", 1, 10, 5, 1)
-        use_system = st.toggle(
-            "Enviar system prompt",
-            value=False,
-            help="Desligado: testa se o treino (SFT/DPO) já alinhou o modelo sem precisar de instrução extra.",
-        )
+        # use_system = st.toggle(
+        #     "Enviar system prompt",
+        #     value=False,
+        #     help="Desligado: testa se o treino (SFT/DPO) já alinhou o modelo sem precisar de instrução extra.",
+        # )
 
     # --- Ficha do modelo -----------------------------------------------------
     on_disk = spec.path.exists()
@@ -690,8 +690,13 @@ if prompt := st.chat_input("Digite sua perguntinha aqui…"):
         llm_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + llm_messages
 
     with st.chat_message("assistant", avatar="🤖"):
+        # Lista de palavras
+        palavras = ["Pensando", "Cucando ", "Quebrando a cabeça", "Viajando na maionese", "Bolando "]
+
+        # Escolhe uma palavra aleatoriamente
+        palavra_escolhida = random.choice(palavras)
         placeholder = st.empty()
-        placeholder.markdown("Pensando… 🤔")
+        placeholder.markdown(f"{palavra_escolhida}… 🤔")
 
         text, n_tokens = "", 0
         start = time.perf_counter()
