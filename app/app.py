@@ -78,17 +78,28 @@ _T72 = "Qwen2.5-72B-Instruct"
 _S15 = "Qwen2.5-1.5B-Instruct"
 
 MODELS: list[ModelSpec] = [
-    ModelSpec("0.5b-f16", "qwen2.5-0.5b-child-f16.gguf", "1dH9Tzbm0ITiMCWEceq5lmQIt3Ox_aAOj",
+    ModelSpec("0.5b-f16", "qwen2.5-0.5b-child-f16.gguf", "1tSAeoLJ5tpFsYSeLrBcWyEYMU9PNP3oe",
               _T14, _S05, "FP16 (precisão original)", "FP16", 1000, 'Quantização Teacher 4bit'),
-    ModelSpec("0.5b-q8", "qwen2.5-0.5b-child-Q8_0.gguf", "1zRFFc7JGIebKetEkd0lvz7Ob9f5rTXjU",
+    
+    ModelSpec("0.5b-q8", "qwen2.5-0.5b-child-Q8_0.gguf", "1pzHMgfCLQuVS-q7_S58-9EqikyDE99jW",
               _T14, _S05, "Quantização 8 bits (Q8_0)", "Q8_0", 506, 'Quantização Teacher 4bit'),
-    ModelSpec("0.5b-q4", "qwen2.5-0.5b-child-Q4_K_M.gguf", "1WhNjVh4TGXNj086_ELSG8taiUEOOVlb6",
+
+    ModelSpec("0.5b-q5", "qwen2.5-0.5b-child-Q5_K_M.gguf", "1BGBgx6Kxa2EdRrzvbRm6BqzwMTJLFCvI",
+              _T14, _S05, "Quantização 4 bits (Q5_K_M)", "Q5_K_M", 400, 'Quantização Teacher 4bit'),
+
+    ModelSpec("0.5b-q4", "qwen2.5-0.5b-child-Q4_K_M.gguf", "1Qg4Mq4yjSKTET7aEgHUhVMnLZE2jGGx9",
               _T14, _S05, "Quantização 4 bits (Q4_K_M)", "Q4_K_M", 400, 'Quantização Teacher 4bit'),
-    ModelSpec("0.5b-q3", "qwen2.5-0.5b-child-Q3_K_M.gguf", "1bSwhBSpq0ZqmGOCcg3gFG6NPaSFReNlm",
+    
+    ModelSpec("0.5b-q3", "qwen2.5-0.5b-child-Q3_K_M.gguf", "1MamA6PvxW0tH7BdcyINtFdbz_bs7B5cq",
               _T14, _S05, "Quantização 3 bits (Q3_K_M)", "Q3_K_M", 339, 'Quantização Teacher 4bit'),
-    ModelSpec("0.5b-q2", "qwen2.5-0.5b-child-Q2_K.gguf", "13OD_oOBdc-i5Rk8aKzrIuQI24ig9FgC7",
+
+    ModelSpec("0.5b-q3L", "qwen2.5-0.5b-child-Q3_K_M.gguf", "1gdszTpjIKRF1KZEHqjeGIZIfmz48IFcK",
+              _T14, _S05, "Quantização 3 bits (Q3_K_Ç)", "Q3_K_L", 339, 'Quantização Teacher 4bit'),
+    
+    ModelSpec("0.5b-q2", "qwen2.5-0.5b-child-Q2_K.gguf", "1xRALMQsueexExlW83kSu26TpjFvrpv9r",
               _T14, _S05, "Quantização extrema 2 bits (Q2_K)", "Q2_K", 340, 'Quantização Teacher 4bit'),
     
+
     ModelSpec("1.5b-f16", "qwen2.5-1.5b-5yoModel-f16.gguf", "1bnjNFOToXqyJQHD-Mx2sv5beoQ6tslHg",
               _T72, _S15, "FP16 (precisão original)", "FP16", 3100, 'Quantização Teacher 4bit'),
     ModelSpec("1.5b-q8", "qwen2.5-1.5b-5yoModel-Q8_0.gguf", "1ukOMhDm_Ch-rjLXVI5oG4rqgWCcUVdIx",
