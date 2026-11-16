@@ -76,25 +76,25 @@ flowchart LR
 
 | Formato | Arquivo |
 |---|---|
-| FP16 | [`qwen2.5-0.5b-child-f16.gguf`](https://drive.google.com/file/d/1dH9Tzbm0ITiMCWEceq5lmQIt3Ox_aAOj/view) |
-| Q8_0 | [`qwen2.5-0.5b-child-Q8_0.gguf`](https://drive.google.com/file/d/1zRFFc7JGIebKetEkd0lvz7Ob9f5rTXjU/view) |
-| Q5_K_M | [`qwen2.5-0.5b-child-Q5_K_M.gguf`](https://drive.google.com/file/d/ID_DRIVE/view) |
-| Q4_K_M | [`qwen2.5-0.5b-child-Q4_K_M.gguf`](https://drive.google.com/file/d/1WhNjVh4TGXNj086_ELSG8taiUEOOVlb6/view) |
-| Q3_K_L | [`qwen2.5-0.5b-child-Q3_K_L.gguf`](https://drive.google.com/file/d/ID_DRIVE/view) |
-| Q3_K_M | [`qwen2.5-0.5b-child-Q3_K_M.gguf`](https://drive.google.com/file/d/1bSwhBSpq0ZqmGOCcg3gFG6NPaSFReNlm/view) |
-| Q2_K | [`qwen2.5-0.5b-child-Q2_K.gguf`](https://drive.google.com/file/d/13OD_oOBdc-i5Rk8aKzrIuQI24ig9FgC7/view) |
+| FP16 | [`qwen2.5-0.5b-child-f16.gguf`](https://drive.google.com/file/d/1tSAeoLJ5tpFsYSeLrBcWyEYMU9PNP3oe/view) |
+| Q8_0 | [`qwen2.5-0.5b-child-Q8_0.gguf`](https://drive.google.com/file/d/1pzHMgfCLQuVS-q7_S58-9EqikyDE99jW/view) |
+| Q5_K_M | [`qwen2.5-0.5b-child-Q5_K_M.gguf`](https://drive.google.com/file/d/1BGBgx6Kxa2EdRrzvbRm6BqzwMTJLFCvI/view) |
+| Q4_K_M | [`qwen2.5-0.5b-child-Q4_K_M.gguf`](https://drive.google.com/file/d/1Qg4Mq4yjSKTET7aEgHUhVMnLZE2jGGx9/view) |
+| Q3_K_L | [`qwen2.5-0.5b-child-Q3_K_L.gguf`](https://drive.google.com/file/d/1gdszTpjIKRF1KZEHqjeGIZIfmz48IFcK/view) |
+| Q3_K_M | [`qwen2.5-0.5b-child-Q3_K_M.gguf`](https://drive.google.com/file/d/1MamA6PvxW0tH7BdcyINtFdbz_bs7B5cq/view) |
+| Q2_K | [`qwen2.5-0.5b-child-Q2_K.gguf`](https://drive.google.com/file/d/1xRALMQsueexExlW83kSu26TpjFvrpv9r/view) |
 
 **Configuração B:** Student `Qwen2.5-1.5B-Instruct`, Teacher `Qwen2.5-14B-Instruct` (8 bits)
 
 | Formato | Arquivo |
 |---|---|
-| FP16 | [`qwen2.5-1.5b-child-f16.gguf`](https://drive.google.com/file/d/12XajOl4i-GuMx7OcEnH4W71gDviBqsI3/view) |
-| Q8_0 | [`qwen2.5-1.5b-child-Q8_0.gguf`](https://drive.google.com/file/d/1_IcwltLjLUjT93zbEiZqm6xvyrtOYcXl/view) |
-| Q5_K_M | [`qwen2.5-1.5b-child-Q5_K_M.gguf`](https://drive.google.com/file/d/ID_DRIVE/view) |
-| Q4_K_M | [`qwen2.5-1.5b-child-Q4_K_M.gguf`](https://drive.google.com/file/d/1yTDiDxq7_CLWt54mHnTwXWNk0vsSYW4_/view) |
-| Q3_K_L | [`qwen2.5-1.5b-child-Q3_K_L.gguf`](https://drive.google.com/file/d/ID_DRIVE/view) |
-| Q3_K_M | [`qwen2.5-1.5b-child-Q3_K_M.gguf`](https://drive.google.com/file/d/1Mc1dDuYEk_AfGk7WIZ5bi99t1G3tUDJq/view) |
-| Q2_K | [`qwen2.5-1.5b-child-Q2_K.gguf`](https://drive.google.com/file/d/1pP9TKyFnkr5_pbwIvci7o7wly0ZSiBS1/view) |
+| FP16 | [`qwen2.5-1.5b-child-f16.gguf`](https://drive.google.com/file/d/1j-u346JH6a4D7ZMLw82vW4yF3C38VO1y/view) |
+| Q8_0 | [`qwen2.5-1.5b-child-Q8_0.gguf`](https://drive.google.com/file/d/1Tf6x4a2BSCIVkMRwfIah7yBcdDZrPgET/view) |
+| Q5_K_M | [`qwen2.5-1.5b-child-Q5_K_M.gguf`](https://drive.google.com/file/d/19kH3iq4fpH7GEgiG0IA3PvVHDebaa4sB/view) |
+| Q4_K_M | [`qwen2.5-1.5b-child-Q4_K_M.gguf`](https://drive.google.com/file/d/11W7iqggrl7V6gffeTLfInUZzts1k3_OH/view) |
+| Q3_K_L | [`qwen2.5-1.5b-child-Q3_K_L.gguf`](https://drive.google.com/file/d/1m6PsJn9aL1cDLDtPsOTyBxAo4oaatT8d/view) |
+| Q3_K_M | [`qwen2.5-1.5b-child-Q3_K_M.gguf`](https://drive.google.com/file/d/135ZaSOMG4aZCl3mn3KxDBbl41FyBDVKF/view) |
+| Q2_K | [`qwen2.5-1.5b-child-Q2_K.gguf`](https://drive.google.com/file/d/18vMxpgQla91yhx1BqJxJvueGxW8LWyH5/view) |
 
 > **Limitações do desenho experimental.** Há um único Teacher e duas configurações. A diferença entre os Students (A contra B) mistura **capacidade do Student**, **precisão do Teacher** (4 bits na A e 8 bits na B) e as particularidades de cada rodada de treino. Os pares 0.5B com Teacher em 8 bits e 1.5B com Teacher em 4 bits não foram treinados, e Teachers maiores (72B) foram retirados do escopo, por custo de GPU. Só a comparação **entre formatos dentro de um mesmo Student** é totalmente controlada, e é nela que as conclusões sobre quantização se apoiam.
 
