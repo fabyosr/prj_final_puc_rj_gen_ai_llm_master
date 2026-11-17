@@ -15,6 +15,7 @@ import gc
 import glob
 import html
 import os
+import pandas as pd
 import platform
 import random
 import re
@@ -98,7 +99,7 @@ MODELS: list[ModelSpec] = [
               _T14, _S05, "Quantização 4 bits (Q4_K_M)", "Q4_K_M", 379, 'Quantização Teacher 4bit'),
 
     ModelSpec("0.5b-q3L", "qwen2.5-0.5b-child-Q3_K_M.gguf", "1gdszTpjIKRF1KZEHqjeGIZIfmz48IFcK",
-              _T14, _S05, "Quantização 3 bits (Q3_K_L)", "Q3_K_L", 359, 'Quantização Teacher 4bit'),
+              _T14, _S05, "Quantização 3 bits (Q3_K_L)", "Q3_K_L", 352, 'Quantização Teacher 4bit'),
     
     ModelSpec("0.5b-q3", "qwen2.5-0.5b-child-Q3_K_M.gguf", "1MamA6PvxW0tH7BdcyINtFdbz_bs7B5cq",
               _T14, _S05, "Quantização 3 bits (Q3_K_M)", "Q3_K_M", 339, 'Quantização Teacher 4bit'),
@@ -109,13 +110,13 @@ MODELS: list[ModelSpec] = [
     # ---------------- Student 1.5B ----------------
     
     ModelSpec("1.5b-14b-f16", "qwen2.5-1.5b-child-f16.gguf", "1j-u346JH6a4D7ZMLw82vW4yF3C38VO1y",
-              _T14, _S15, "FP16 (precisão original)", "FP16", 2880, 'Quantização Teacher 8bit'),
+              _T14, _S15, "FP16 (precisão original)", "FP16", 2950, 'Quantização Teacher 8bit'),
 
     ModelSpec("1.5b-14b-q8", "qwen2.5-1.5b-child-Q8_0.gguf", "1Tf6x4a2BSCIVkMRwfIah7yBcdDZrPgET",
-              _T14, _S15, "Quantização 8 bits (Q8_0)", "Q8_0", 1536, 'Quantização Teacher 8bit'),
+              _T14, _S15, "Quantização 8 bits (Q8_0)", "Q8_0", 1570, 'Quantização Teacher 8bit'),
 
     ModelSpec("1.5b-14b-q5", "qwen2.5-1.5b-child-Q5_K_M.gguf", "19kH3iq4fpH7GEgiG0IA3PvVHDebaa4sB",
-              _T14, _S15, "Quantização 8 bits (Q5_K_M)", "Q5_K_M", 1000, 'Quantização Teacher 8bit'),
+              _T14, _S15, "Quantização 8 bits (Q5_K_M)", "Q5_K_M", 1072, 'Quantização Teacher 8bit'),
 
     ModelSpec("1.5b-14b-q4", "qwen2.5-1.5b-child-Q4_K_M.gguf", "11W7iqggrl7V6gffeTLfInUZzts1k3_OH",
               _T14, _S15, "Quantização 4 bits (Q4_K_M)", "Q4_K_M", 940, 'Quantização Teacher 8bit'),
@@ -526,6 +527,127 @@ def cpu_panel(info: dict, n_threads: int) -> str:
         + (f'<div class="chips">{chips}</div>' if chips else "")
     )
 
+# =============================================================================
+# AVALIAÇÃO DOS MODELOS (seção "📊 Avaliação dos modelos")
+# =============================================================================
+AVAL_CSV = Path(__file__).parent / "avaliacao" / "avaliacao_modelos.csv"
+FORMATOS_ORDEM = ["FP16", "Q8_0", "Q5_K_M", "Q4_K_M", "Q3_K_L", "Q3_K_M", "Q2_K"]
+
+
+@st.cache_data
+def carregar_avaliacao() -> pd.DataFrame | None:
+    if not AVAL_CSV.exists():
+        return None
+    df = pd.read_csv(AVAL_CSV)
+    df["Student"] = df["student"].str.upper()                                   # 0.5B / 1.5B
+    df["Formato"] = pd.Categorical(df["format"].replace({"f16": "FP16"}), FORMATOS_ORDEM, ordered=True)
+    return df.sort_values(["Student", "Formato"]).reset_index(drop=True)
+
+
+def grafico_barras(df: pd.DataFrame, coluna: str, titulo: str, log: bool = False):
+    """Barras (ou pontos, em escala log) por formato; azul = 0.5B, laranja = 1.5B."""
+    import altair as alt
+
+    d = df.dropna(subset=[coluna]).copy()
+    d["Formato"] = d["Formato"].astype(str)
+    d["Student"] = "Student " + d["Student"]
+    marca = alt.Chart(d).mark_circle(size=150, opacity=0.95) if log else alt.Chart(d).mark_bar()   # barras não existem em escala log
+    return (
+        marca
+        .encode(
+            x=alt.X("Student:N", axis=None),
+            y=alt.Y(f"{coluna}:Q", title=titulo, scale=alt.Scale(type="log") if log else alt.Scale(zero=True), axis=alt.Axis(grid=not log)),
+            color=alt.Color("Student:N", legend=alt.Legend(orient="bottom", title=None),
+                            scale=alt.Scale(domain=["Student 0.5B", "Student 1.5B"], range=["#3E8EF7", "#FF9F45"])),
+            column=alt.Column("Formato:N", sort=FORMATOS_ORDEM, title=None, header=alt.Header(labelOrient="bottom")),
+            tooltip=["Student", "Formato", alt.Tooltip(f"{coluna}:Q", title=titulo)],
+        )
+        .properties(width=34, height=190)
+    )
+
+
+def render_avaliacao(spec: ModelSpec) -> None:
+    df = carregar_avaliacao()
+    if df is None:
+        st.warning(f"Arquivo da avaliação não encontrado: `{AVAL_CSV}`.")
+        return
+
+    # --- modelo selecionado na barra lateral ---------------------------------
+    st.markdown(f"##### Modelo selecionado: {spec.menu_label}")
+    sel = df[(df["Student"] == spec.family) & (df["Formato"].astype(str) == spec.short_fmt)]
+    if not sel.empty:
+        r = sel.iloc[0]
+        st.markdown(
+            tiles([
+                ("Formato OK (português)", f"{r.formato_ok_pt_pct:.0f}%", "cool" if r.formato_ok_pt_pct >= 95 else "hot"),
+                ("KL vs FP16", "—" if pd.isna(r.kld_mean) else f"{r.kld_mean:.4f}", ""),
+                ("Velocidade", f"{r.decode_tps:.1f} tok/s", ""),
+                ("RAM de pico", f"{r.ram_pico_mb:,.0f} MB", ""),
+            ]) + info_card([("Leitura", r.leitura), ("Falha em português", r.modo_falha)]),
+            unsafe_allow_html=True,
+        )
+
+    # --- resumo ---------------------------------------------------------------
+    st.markdown(
+        """
+**Resumo da avaliação.** Os 14 modelos responderam aos mesmos 100 prompts (30 de curiosidade, 50 de guardrail e 20 sensíveis legítimos), sem *system prompt* explícito, com temperatura 0 e semente fixa, em CPU.
+
+- **Formato (CoT) em português:** Q8_0, Q5_K_M e Q4_K_M equivalem ao FP16 nos dois Students. O 0.5B degrada aos poucos no Q3 e no Q2_K; o 1.5B **quebra no Q3** (o modelo pensa e para, sem resposta final) e entra em laço no Q2_K.
+- **Velocidade e RAM:** o FP16 é o único realmente lento em CPU. O Q4_K_M gera cerca de 2× mais rápido e usa ~45% (0.5B) a ~61% (1.5B) menos RAM de pico.
+- **Idioma:** o dataset de treino é 100% pt-BR. Em inglês e espanhol o CoT quase não aparece (FP16: 1 de 7 prompts no 0.5B e 5 de 7 no 1.5B).
+- **Limites:** guardrails e adequação à idade ainda não foram pontuados por um avaliador, e com 100 prompts por modelo as diferenças pequenas não são conclusivas.
+"""
+    )
+
+    # --- tabelas e gráficos ---------------------------------------------------
+    base = df.copy()
+    base["Formato"] = base["Formato"].astype(str)
+    t1, t2, t3 = st.tabs(["Geração de texto", "Fidelidade ao FP16", "Custo em CPU"])
+
+    with t1:
+        st.altair_chart(grafico_barras(df, "formato_ok_pt_pct", "Formato OK em português (%)"))
+        st.dataframe(
+            base[["Student", "Formato", "formato_ok_pt_pct", "formato_ok_pt_n", "truncado_pct", "repeticao", "modo_falha", "leitura"]]
+            .rename(columns={"formato_ok_pt_pct": "Formato OK (PT)", "formato_ok_pt_n": "OK em PT (n)", "truncado_pct": "Truncado (%)",
+                             "repeticao": "Repetição", "modo_falha": "Falha em português", "leitura": "Leitura"}),
+            hide_index=True,
+            column_config={
+                "Formato OK (PT)": st.column_config.ProgressColumn(min_value=0, max_value=100, format="%.0f%%"),
+                "Truncado (%)": st.column_config.NumberColumn(format="%.0f"),
+                "Repetição": st.column_config.NumberColumn(format="%.3f"),
+            },
+        )
+    with t2:
+        st.altair_chart(grafico_barras(df, "kld_mean", "KL média vs FP16 (escala log)", log=True))
+        st.dataframe(
+            base[["Student", "Formato", "bits_per_weight", "kld_mean", "same_top_p", "ppl_delta_pct"]]
+            .rename(columns={"bits_per_weight": "Bits/peso", "kld_mean": "KL média", "same_top_p": "Top-1 igual (%)", "ppl_delta_pct": "ΔPPL (%)"}),
+            hide_index=True,
+            column_config={"KL média": st.column_config.NumberColumn(format="%.4f"), "Bits/peso": st.column_config.NumberColumn(format="%.2f")},
+        )
+        st.caption("KL e top-1 medem o quanto a distribuição do modelo quantizado se afasta da do FP16 do mesmo Student (~20 mil tokens pontuados).")
+    with t3:
+        st.altair_chart(grafico_barras(df, "decode_tps", "Velocidade de geração (tok/s)"))
+        st.altair_chart(grafico_barras(df, "ram_pico_mb", "RAM de pico (MB)"))
+        st.dataframe(
+            base[["Student", "Formato", "size_mb", "ram_pico_mb", "decode_tps", "s_por_resposta", "ttft_s"]]
+            .rename(columns={"size_mb": "Arquivo (MB)", "ram_pico_mb": "RAM de pico (MB)", "decode_tps": "tok/s",
+                             "s_por_resposta": "s/resposta", "ttft_s": "TTFT (s)"}),
+            hide_index=True,
+        )
+        st.caption("CPU com 8 threads e mmap desligado. s/resposta = tokens da resposta ÷ tok/s + TTFT.")
+
+    with st.expander("Como a avaliação foi feita"):
+        st.markdown(
+            """
+- **Prompts:** 100, sem histórico; 7 deles em inglês ou espanhol. Temperatura 0, semente 42, máximo de 512 tokens, contexto de 2048. O template de chat do Qwen2.5 pode inserir o *system prompt* padrão do modelo.
+- **Formato OK:** um único bloco `<pensamento>…</pensamento>` bem formado, seguido de uma resposta não vazia. As taxas usam só os 93 prompts em português.
+- **Fidelidade:** PPL e KL sobre ~40 mil tokens (79 janelas de 512), comparando cada formato com o FP16 do mesmo Student.
+- **Custo:** pico de RAM do processo com o modelo carregado; tokens por segundo na geração (mediana).
+- **Limitações:** os Students usam Teachers com precisões diferentes (4 bits no 0.5B e 8 bits no 1.5B); não há avaliador de guardrails e persona; as heurísticas por palavra-chave foram descartadas por gerarem falsos positivos.
+"""
+        )
+    st.download_button("⬇️ Baixar tabela (CSV)", data=base.drop(columns=["Student", "Formato"]).to_csv(index=False).encode("utf-8"), file_name="avaliacao_modelos.csv", mime="text/csv")
 
 manager = get_manager()
 
@@ -644,6 +766,17 @@ with st.sidebar:
         st.session_state.setdefault("histories", {})[spec.key] = []
         st.rerun()
 
+# --- Navegação principal: conversa ou avaliação ---------------------------
+VIEW_CHAT, VIEW_AVAL = "💬 Conversa", "📊 Avaliação dos modelos"
+if hasattr(st, "segmented_control"):
+    view = st.segmented_control("Seção", [VIEW_CHAT, VIEW_AVAL], default=VIEW_CHAT, key="view",
+                                label_visibility="collapsed") or VIEW_CHAT
+else:
+    view = st.radio("Seção", [VIEW_CHAT, VIEW_AVAL], horizontal=True, key="view", label_visibility="collapsed")
+if view == VIEW_AVAL:
+    render_avaliacao(spec)
+    st.stop()
+    
 # Sem arquivo local não há o que conversar ainda.
 if not spec.path.exists() or manager.llm is None:
     st.info("👈 Escolha um modelo na barra lateral e baixe-o para começar a conversar.")
