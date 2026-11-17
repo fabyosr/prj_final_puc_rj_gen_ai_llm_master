@@ -688,35 +688,35 @@ with st.sidebar:
 
     # --- Ajustes de execução (afetam a medição, por isso vêm antes do load) ---
     with st.expander("⚙️ Ajustes", expanded=False):
-    n_threads = st.slider(
-        "Threads de CPU", 1, max(os.cpu_count() or 2, 2), min(2, os.cpu_count() or 2),
-        help="Quantas threads de CPU o llama.cpp usa para gerar. Mais threads aceleram até o número de núcleos "
-             "físicos; acima disso costumam piorar. Alterar recarrega o modelo e refaz a medição de RAM.",
-    )
-    use_mmap = st.toggle(
-        "Usar mmap",
-        value=True,
-        help="Ligado: o SO carrega o arquivo sob demanda (RAM sobe aos poucos). "
-             "Desligado: o modelo inteiro é copiado para a RAM ao carregar, e a medição reflete o custo real. "
-             "Alterar recarrega o modelo.",
-    )
-    temperature = st.slider(
-        "Temperatura", 0.0, 1.5, 0.45, 0.05,
-        help="Aleatoriedade das respostas. 0 = sempre escolhe o token mais provável (determinístico, ideal para "
-             "comparar modelos). Valores altos deixam as respostas mais variadas, e mais sujeitas a erros.",
-    )
-    max_tokens = st.slider(
-        "Máx. de tokens", 50, 600, 350, 25,
-        help="Limite de tokens por resposta. Conta o raciocínio (<pensamento>) e a resposta final juntos: "
-             "se for baixo, a resposta é cortada (aparece “cortada no limite de tokens”). "
-             "Na avaliação dos modelos foi usado 512.",
-    )
-    max_msg_history = st.slider(
-        "Max message history", 1, 10, 1, 1,
-        help="Quantas mensagens recentes da conversa (suas e do modelo) são reenviadas a cada pergunta. "
-             "O modelo não guarda memória: o app reenvia esse histórico. Valores maiores dão mais contexto, "
-             "mas ocupam a janela de 2048 tokens e deixam a resposta mais lenta.",
-    )
+      n_threads = st.slider(
+          "Threads de CPU", 1, max(os.cpu_count() or 2, 2), min(2, os.cpu_count() or 2),
+          help="Quantas threads de CPU o llama.cpp usa para gerar. Mais threads aceleram até o número de núcleos "
+               "físicos; acima disso costumam piorar. Alterar recarrega o modelo e refaz a medição de RAM.",
+      )
+      use_mmap = st.toggle(
+          "Usar mmap",
+          value=True,
+          help="Ligado: o SO carrega o arquivo sob demanda (RAM sobe aos poucos). "
+               "Desligado: o modelo inteiro é copiado para a RAM ao carregar, e a medição reflete o custo real. "
+               "Alterar recarrega o modelo.",
+      )
+      temperature = st.slider(
+          "Temperatura", 0.0, 1.5, 0.45, 0.05,
+          help="Aleatoriedade das respostas. 0 = sempre escolhe o token mais provável (determinístico, ideal para "
+               "comparar modelos). Valores altos deixam as respostas mais variadas, e mais sujeitas a erros.",
+      )
+      max_tokens = st.slider(
+          "Máx. de tokens", 50, 600, 350, 25,
+          help="Limite de tokens por resposta. Conta o raciocínio (<pensamento>) e a resposta final juntos: "
+               "se for baixo, a resposta é cortada (aparece “cortada no limite de tokens”). "
+               "Na avaliação dos modelos foi usado 512.",
+      )
+      max_msg_history = st.slider(
+          "Max message history", 1, 10, 1, 1,
+          help="Quantas mensagens recentes da conversa (suas e do modelo) são reenviadas a cada pergunta. "
+               "O modelo não guarda memória: o app reenvia esse histórico. Valores maiores dão mais contexto, "
+               "mas ocupam a janela de 2048 tokens e deixam a resposta mais lenta.",
+      )
 
     # --- Ficha do modelo -----------------------------------------------------
     on_disk = spec.path.exists()
