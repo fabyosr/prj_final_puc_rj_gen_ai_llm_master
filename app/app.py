@@ -724,8 +724,7 @@ with st.sidebar:
     st.markdown(badge, unsafe_allow_html=True)
     st.markdown(lineage_card(spec), unsafe_allow_html=True)
 
-    # --- 
-    Download sob demanda ------------------------------------------------
+    # --- Download sob demanda ------------------------------------------------
     if not on_disk:
         if spec.drive_id is None:
             st.warning("O id do Google Drive deste modelo está pendente. Edite o catálogo em `MODELS`.")
