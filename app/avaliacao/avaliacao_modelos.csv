@@ -1,0 +1,15 @@
+student,format,size_mb,bits_per_weight,kld_mean,same_top_p,ppl_delta_pct,formato_ok_pt_pct,formato_ok_pt_n,formato_ok_outros_n,truncado_pct,repeticao,tokens_resp,decode_tps,ttft_s,s_por_resposta,ram_modelo_mb,ram_pico_mb,modo_falha,leitura
+0.5b,f16,948.1,16.1,,,,100.0,93/93,1/7,0.0,0.162,159.0,29.1,0.22,5.7,1019.0,1246.0,nenhuma em português,Referência (lento em CPU)
+0.5b,Q8_0,506.5,8.6,0.0022,97.3,0.1,100.0,93/93,1/7,0.0,0.161,157.0,48.5,0.26,3.5,578.0,806.0,nenhuma em português,Equivalente ao FP16
+0.5b,Q5_K_M,400.6,6.8,0.0223,91.8,1.8,100.0,93/93,0/7,2.0,0.159,142.0,46.8,0.48,3.5,472.0,706.0,nenhuma em português,Equivalente ao FP16
+0.5b,Q4_K_M,379.4,6.44,0.0328,90.2,2.2,100.0,93/93,0/7,3.0,0.191,160.0,47.3,0.31,3.7,451.0,687.0,nenhuma em português,Recomendado: equilíbrio entre RAM e formato
+0.5b,Q3_K_L,352.2,5.98,0.0766,85.5,8.5,93.5,87/93,0/7,5.0,0.224,171.0,57.3,0.26,3.2,424.0,659.0,4 sem fechar a tag (cortadas no limite); 2 com o bloco de pensamento repetido,Degrada o formato
+0.5b,Q3_K_M,339.0,5.76,0.1041,83.3,11.0,93.5,87/93,0/7,3.0,0.206,175.0,58.9,0.22,3.2,411.0,646.0,6 com o bloco de pensamento repetido,Degrada o formato
+0.5b,Q2_K,322.9,5.48,0.2382,75.2,23.6,90.3,84/93,0/7,10.0,0.268,181.0,59.9,0.24,3.3,395.0,630.0,3 sem fechar a tag (cortadas no limite); 6 com o bloco de pensamento repetido,Degrada o formato e gera laços
+1.5b,f16,2950.4,16.03,,,,98.9,92/93,5/7,1.0,0.089,156.0,8.5,0.7,19.1,3054.0,3285.0,1 com o bloco de pensamento repetido,Referência (lento em CPU)
+1.5b,Q8_0,1570.3,8.53,0.0016,97.8,0.2,98.9,92/93,5/7,0.0,0.076,153.0,13.8,0.83,11.9,1674.0,1909.0,1 com o bloco de pensamento repetido,Equivalente ao FP16
+1.5b,Q5_K_M,1072.9,5.83,0.0179,93.0,2.0,100.0,93/93,6/7,2.0,0.087,148.0,15.2,0.82,10.6,1176.0,1418.0,nenhuma em português,Equivalente ao FP16
+1.5b,Q4_K_M,940.4,5.11,0.0474,89.4,3.9,98.9,92/93,0/7,0.0,0.068,149.0,17.8,0.72,9.1,1044.0,1285.0,1 sem tags,Recomendado: equivalente ao FP16 com ~60% menos RAM
+1.5b,Q3_K_L,839.4,4.56,0.1454,81.8,15.0,53.8,50/93,1/7,10.0,0.198,176.0,16.9,0.8,11.2,943.0,1184.0,"43 sem fechar a tag (34 param sozinhas, 9 cortadas)",Quebra o formato: metade sem resposta final
+1.5b,Q3_K_M,786.0,4.27,0.1709,80.3,16.7,2.2,2/93,0/7,12.0,0.161,156.0,17.4,0.72,9.7,890.0,1132.0,"91 sem fechar a tag (79 param sozinhas, 12 cortadas)","Quebra o formato: só raciocínio, sem resposta"
+1.5b,Q2_K,645.0,3.5,1.1401,51.5,194.4,2.2,2/93,0/7,64.0,0.596,343.0,20.5,0.85,17.6,749.0,990.0,"70 sem fechar a tag (23 param sozinhas, 47 cortadas); 21 sem tags (laços de repetição)",Inutilizável: laços de repetição
