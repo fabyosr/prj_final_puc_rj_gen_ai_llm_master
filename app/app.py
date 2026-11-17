@@ -221,7 +221,6 @@ class ModelManager:
                 "default_system": "You are Qwen" in meta.get("tokenizer.chat_template", ""),
             }
 
-
 @st.cache_resource
 def get_manager() -> ModelManager:
     return ModelManager()
@@ -830,7 +829,7 @@ if view == VIEW_AVAL:
     st.stop()
 
 # Sem arquivo local não há o que conversar ainda.
-if not spec.path.exists() or manager.llm is None:
+if not spec.path.exists() or manager.llm is None or on_disk:
     st.info("👈 Escolha um modelo na barra lateral e baixe-o para começar a conversar.")
     st.stop()
 
