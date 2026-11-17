@@ -824,15 +824,20 @@ if hasattr(st, "segmented_control"):
                                 label_visibility="collapsed") or VIEW_CHAT
 else:
     view = st.radio("Seção", [VIEW_CHAT, VIEW_AVAL], horizontal=True, key="view", label_visibility="collapsed")
+    
+modelo_pronto = spec.path.exists() and manager.llm is not None
+# O chat_input é criado SEMPRE, no mesmo ponto do script (só muda o disabled). Criá-lo e removê-lo
+# conforme a seção pode fazê-lo sumir do rodapé no navegador.
+prompt = st.chat_input("Digite sua perguntinha aqui…", disabled=(view == VIEW_AVAL or not modelo_pronto))
+
 if view == VIEW_AVAL:
     render_avaliacao(spec)
     st.stop()
 
-# Sem arquivo local não há o que conversar ainda.
-if not spec.path.exists() or manager.llm is None or on_disk:
+  # Sem arquivo local não há o que conversar ainda.
+  if not modelo_pronto:
     st.info("👈 Escolha um modelo na barra lateral e baixe-o para começar a conversar.")
     st.stop()
-
 
 # =============================================================================
 # 5. CHAT
@@ -915,7 +920,7 @@ def render_message(content: str, meta: dict | None = None) -> None:
             else:
                 st.markdown(msg["content"])
 
-    if prompt := st.chat_input("Digite sua perguntinha aqui…"):
+    if prompt:
         history.append({"role": "user", "content": prompt})
         with st.chat_message("user", avatar="🧒"):
             st.markdown(prompt)
