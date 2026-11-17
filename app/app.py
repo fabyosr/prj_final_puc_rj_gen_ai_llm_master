@@ -834,10 +834,10 @@ if view == VIEW_AVAL:
     render_avaliacao(spec)
     st.stop()
 
-  # Sem arquivo local não há o que conversar ainda.
-  if not modelo_pronto:
-    st.info("👈 Escolha um modelo na barra lateral e baixe-o para começar a conversar.")
-    st.stop()
+# Sem arquivo local não há o que conversar ainda.
+if not modelo_pronto:
+  st.info("👈 Escolha um modelo na barra lateral e baixe-o para começar a conversar.")
+  st.stop()
 
 # =============================================================================
 # 5. CHAT
