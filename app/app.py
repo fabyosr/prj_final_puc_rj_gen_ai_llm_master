@@ -88,27 +88,27 @@ MODELS: list[ModelSpec] = [
     # ---------------- Student 0.5B ----------------
     ModelSpec("0.5b-f16", "qwen2.5-0.5b-child-f16.gguf", "1tSAeoLJ5tpFsYSeLrBcWyEYMU9PNP3oe",
               _T14, _S05, "FP16 (precisão original)", "FP16", 948, 'Quantização Teacher 4bit'),
-    
+
     ModelSpec("0.5b-q8", "qwen2.5-0.5b-child-Q8_0.gguf", "1pzHMgfCLQuVS-q7_S58-9EqikyDE99jW",
               _T14, _S05, "Quantização 8 bits (Q8_0)", "Q8_0", 506, 'Quantização Teacher 4bit'),
 
     ModelSpec("0.5b-q5", "qwen2.5-0.5b-child-Q5_K_M.gguf", "1BGBgx6Kxa2EdRrzvbRm6BqzwMTJLFCvI",
-              _T14, _S05, "Quantização 4 bits (Q5_K_M)", "Q5_K_M", 400, 'Quantização Teacher 4bit'),
+              _T14, _S05, "Quantização 5 bits (Q5_K_M)", "Q5_K_M", 400, 'Quantização Teacher 4bit'),
 
     ModelSpec("0.5b-q4", "qwen2.5-0.5b-child-Q4_K_M.gguf", "1Qg4Mq4yjSKTET7aEgHUhVMnLZE2jGGx9",
               _T14, _S05, "Quantização 4 bits (Q4_K_M)", "Q4_K_M", 379, 'Quantização Teacher 4bit'),
 
-    ModelSpec("0.5b-q3L", "qwen2.5-0.5b-child-Q3_K_M.gguf", "1gdszTpjIKRF1KZEHqjeGIZIfmz48IFcK",
+    ModelSpec("0.5b-q3L", "qwen2.5-0.5b-child-Q3_K_L.gguf", "1gdszTpjIKRF1KZEHqjeGIZIfmz48IFcK",
               _T14, _S05, "Quantização 3 bits (Q3_K_L)", "Q3_K_L", 352, 'Quantização Teacher 4bit'),
-    
+
     ModelSpec("0.5b-q3", "qwen2.5-0.5b-child-Q3_K_M.gguf", "1MamA6PvxW0tH7BdcyINtFdbz_bs7B5cq",
               _T14, _S05, "Quantização 3 bits (Q3_K_M)", "Q3_K_M", 339, 'Quantização Teacher 4bit'),
-    
+
     ModelSpec("0.5b-q2", "qwen2.5-0.5b-child-Q2_K.gguf", "1xRALMQsueexExlW83kSu26TpjFvrpv9r",
               _T14, _S05, "Quantização extrema 2 bits (Q2_K)", "Q2_K", 322, 'Quantização Teacher 4bit'),
 
     # ---------------- Student 1.5B ----------------
-    
+
     ModelSpec("1.5b-14b-f16", "qwen2.5-1.5b-child-f16.gguf", "1j-u346JH6a4D7ZMLw82vW4yF3C38VO1y",
               _T14, _S15, "FP16 (precisão original)", "FP16", 2950, 'Quantização Teacher 8bit'),
 
@@ -116,7 +116,7 @@ MODELS: list[ModelSpec] = [
               _T14, _S15, "Quantização 8 bits (Q8_0)", "Q8_0", 1570, 'Quantização Teacher 8bit'),
 
     ModelSpec("1.5b-14b-q5", "qwen2.5-1.5b-child-Q5_K_M.gguf", "19kH3iq4fpH7GEgiG0IA3PvVHDebaa4sB",
-              _T14, _S15, "Quantização 8 bits (Q5_K_M)", "Q5_K_M", 1072, 'Quantização Teacher 8bit'),
+              _T14, _S15, "Quantização 5 bits (Q5_K_M)", "Q5_K_M", 1072, 'Quantização Teacher 8bit'),
 
     ModelSpec("1.5b-14b-q4", "qwen2.5-1.5b-child-Q4_K_M.gguf", "11W7iqggrl7V6gffeTLfInUZzts1k3_OH",
               _T14, _S15, "Quantização 4 bits (Q4_K_M)", "Q4_K_M", 940, 'Quantização Teacher 8bit'),
@@ -126,7 +126,7 @@ MODELS: list[ModelSpec] = [
 
     ModelSpec("1.5b-14b-q3", "qwen2.5-1.5b-child-Q3_K_M.gguf", "135ZaSOMG4aZCl3mn3KxDBbl41FyBDVKF",
               _T14, _S15, "Quantização 3 bits (Q3_K_M)", "Q3_K_M", 786, 'Quantização Teacher 8bit'),
-    
+
     ModelSpec("1.5b-14b-q2", "qwen2.5-1.5b-child-Q2_K.gguf", "18vMxpgQla91yhx1BqJxJvueGxW8LWyH5",
               _T14, _S15, "Quantização extrema 2 bits (Q2_K)", "Q2_K", 645, 'Quantização Teacher 8bit'),
 ]
@@ -400,7 +400,7 @@ st.markdown(
     <div class="by"><b>Fabyo Ramos</b><span>Pós-graduação em GenAI &amp; LLM Master, PUC-Rio</span></div>
   </div>
   <div class="viz">
-    <div class="node n1"><div class="dot"><i></i></div><div><b>Teacher</b><b>Teacher</b><br>14B</div></div>
+    <div class="node n1"><div class="dot"><i></i></div><div><b>Teacher</b><br>14B</div></div>
     <div class="link"></div>
     <div class="node n2"><div class="dot"><i></i></div><div><b>Student</b><br>0.5B / 1.5B</div></div>
     <div class="link"></div>
@@ -687,35 +687,35 @@ with st.sidebar:
 
     # --- Ajustes de execução (afetam a medição, por isso vêm antes do load) ---
     with st.expander("⚙️ Ajustes", expanded=False):
-      n_threads = st.slider(
-        "Threads de CPU", 1, max(os.cpu_count() or 2, 2), min(2, os.cpu_count() or 2),
-        help="Quantas threads de CPU o llama.cpp usa para gerar. Mais threads aceleram até o número de núcleos "
-        "físicos; acima disso costumam piorar. Alterar recarrega o modelo e refaz a medição de RAM.",
-      )
-      use_mmap = st.toggle(
-        "Usar mmap",
-        value=True,
-        help="Ligado: o SO carrega o arquivo sob demanda (RAM sobe aos poucos). "
-        "Desligado: o modelo inteiro é copiado para a RAM ao carregar, e a medição reflete o custo real. "
-        "Alterar recarrega o modelo.",
-      )
-      temperature = st.slider(
-        "Temperatura", 0.0, 1.5, 0.45, 0.05,
-        help="Aleatoriedade das respostas. 0 = sempre escolhe o token mais provável (determinístico, ideal para "
-        "comparar modelos). Valores altos deixam as respostas mais variadas, e mais sujeitas a erros.",
-      )
-      max_tokens = st.slider(
-        "Máx. de tokens", 50, 600, 350, 25,
-        help="Limite de tokens por resposta. Conta o raciocínio (<pensamento>) e a resposta final juntos: "
-        "se for baixo, a resposta é cortada (aparece “cortada no limite de tokens”). "
-        "Na avaliação dos modelos foi usado 512.",
-      )
-      max_msg_history = st.slider(
-        "Max message history", 1, 10, 1, 1,
-        help="Quantas mensagens recentes da conversa (suas e do modelo) são reenviadas a cada pergunta. "
-        "O modelo não guarda memória: o app reenvia esse histórico. Valores maiores dão mais contexto, "
-        "mas ocupam a janela de 2048 tokens e deixam a resposta mais lenta.",
-      )
+        n_threads = st.slider(
+            "Threads de CPU", 1, max(os.cpu_count() or 2, 2), min(2, os.cpu_count() or 2),
+            help="Quantas threads de CPU o llama.cpp usa para gerar. Mais threads aceleram até o número de núcleos "
+            "físicos; acima disso costumam piorar. Alterar recarrega o modelo e refaz a medição de RAM.",
+        )
+        use_mmap = st.toggle(
+            "Usar mmap",
+            value=True,
+            help="Ligado: o SO carrega o arquivo sob demanda (RAM sobe aos poucos). "
+            "Desligado: o modelo inteiro é copiado para a RAM ao carregar, e a medição reflete o custo real. "
+            "Alterar recarrega o modelo.",
+        )
+        temperature = st.slider(
+            "Temperatura", 0.0, 1.5, 0.45, 0.05,
+            help="Aleatoriedade das respostas. 0 = sempre escolhe o token mais provável (determinístico, ideal para "
+            "comparar modelos). Valores altos deixam as respostas mais variadas, e mais sujeitas a erros.",
+        )
+        max_tokens = st.slider(
+            "Máx. de tokens", 50, 600, 350, 25,
+            help="Limite de tokens por resposta. Conta o raciocínio (<pensamento>) e a resposta final juntos: "
+            "se for baixo, a resposta é cortada (aparece “cortada no limite de tokens”). "
+            "Na avaliação dos modelos foi usado 512.",
+        )
+        max_msg_history = st.slider(
+            "Max message history", 1, 10, 1, 1,
+            help="Quantas mensagens recentes da conversa (suas e do modelo) são reenviadas a cada pergunta. "
+            "O modelo não guarda memória: o app reenvia esse histórico. Valores maiores dão mais contexto, "
+            "mas ocupam a janela de 2048 tokens e deixam a resposta mais lenta.",
+        )
 
     # --- Ficha do modelo -----------------------------------------------------
     on_disk = spec.path.exists()
@@ -836,8 +836,8 @@ if view == VIEW_AVAL:
 
 # Sem arquivo local não há o que conversar ainda.
 if not modelo_pronto:
-  st.info("👈 Escolha um modelo na barra lateral e baixe-o para começar a conversar.")
-  st.stop()
+    st.info("👈 Escolha um modelo na barra lateral e baixe-o para começar a conversar.")
+    st.stop()
 
 # =============================================================================
 # 5. CHAT
@@ -910,26 +910,26 @@ def render_message(content: str, meta: dict | None = None) -> None:
             chips.append('<span class="meta-chip warn">cortada no limite de tokens</span>')
         st.markdown("".join(chips), unsafe_allow_html=True)
 
-    history: list = histories.setdefault(spec.key, [])  # conversa separada por modelo
 
-    for msg in history:
-        avatar = "🧒" if msg["role"] == "user" else "🤖"
-        with st.chat_message(msg["role"], avatar=avatar):
-            if msg["role"] == "assistant":
-                render_message(msg["content"], msg.get("meta"))
-            else:
-                st.markdown(msg["content"])
+histories: dict = st.session_state.setdefault("histories", {})
+history: list = histories.setdefault(spec.key, [])  # conversa separada por modelo
 
-    st.markdown(f'prompt: {prompt}')
+for msg in history:
+    avatar = "🧒" if msg["role"] == "user" else "🤖"
+    with st.chat_message(msg["role"], avatar=avatar):
+        if msg["role"] == "assistant":
+            render_message(msg["content"], msg.get("meta"))
+        else:
+            st.markdown(msg["content"])
 
-    if prompt:
-        history.append({"role": "user", "content": prompt})
-        with st.chat_message("user", avatar="🧒"):
-            st.markdown(prompt)
+if prompt:
+    history.append({"role": "user", "content": prompt})
+    with st.chat_message("user", avatar="🧒"):
+        st.markdown(prompt)
 
     # Só role/content vão para o modelo (o campo "meta" fica de fora)
     llm_messages = [{"role": m["role"], "content": m["content"]} for m in history[-max_msg_history:]]
-    
+
     with st.chat_message("assistant", avatar="🤖"):
         # Lista de palavras
         palavras = ["Pensando", "Cucando ", "Quebrando a cabeça", "Viajando na maionese", "Bolando "]
