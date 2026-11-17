@@ -149,6 +149,11 @@ def trim_memory() -> None:
     except Exception:
         pass
 
+OPEN, CLOSE = "<pensamento>", "</pensamento>"
+
+# códigos do enum llama_ftype (general.file_type no GGUF)
+FTYPE = {0: "F32", 1: "FP16", 7: "Q8_0", 10: "Q2_K", 12: "Q3_K_M", 13: "Q3_K_L",
+         14: "Q4_K_S", 15: "Q4_K_M", 16: "Q5_K_S", 17: "Q5_K_M", 18: "Q6_K"}
 
 class ModelManager:
     """Mantém UM modelo na RAM por vez e registra métricas honestas a cada troca."""
@@ -191,6 +196,16 @@ class ModelManager:
             )
             ram_after = rss_mb()
 
+            meta = getattr(self.llm, "metadata", None) or {}        # metadados lidos do próprio arquivo GGUF
+            try:
+                ftype = FTYPE.get(int(meta.get("general.file_type", -1)), "desconhecido")
+            except (ValueError, TypeError):
+                ftype = "desconhecido"
+            try:
+                n_params = int(self.llm._model.n_params())          # atributo interno: pode mudar entre versões
+            except Exception:
+                n_params = None
+
             self.spec = spec
             self.signature = signature
             self.stats = {
@@ -199,6 +214,11 @@ class ModelManager:
                 "ram_after": ram_after,
                 "ram_model": max(ram_after - ram_before, 0.0),
                 "mmap": use_mmap,
+                "file_type": ftype,                                  # formato REAL do arquivo
+                "format_ok": ftype == spec.short_fmt,                # bate com o catálogo?
+                "n_params": n_params,
+                "bits_per_weight": spec.path.stat().st_size * 8 / n_params if n_params else None,
+                "default_system": "You are Qwen" in meta.get("tokenizer.chat_template", ""),
             }
 
 
@@ -302,6 +322,7 @@ html, body, [class*="css"], .stApp { font-family:'Nunito',sans-serif; }
   display:inline-block; background:#EEF5FF; border:1px solid var(--line); color:#4B5B7C;
   border-radius:999px; padding:2px 10px; font-size:.74rem; margin:6px 6px 0 0;
 }
+.meta-chip.warn{ background:#FFF4D6; border-color:#FFE08A; color:#8A5A00; }
 .cot-box{
   background:#17203A; color:#7CF0C0; padding:10px 12px; border-radius:12px;
   font-family:ui-monospace,monospace; font-size:.82rem; margin-bottom:8px; white-space:pre-wrap;
@@ -666,17 +687,36 @@ with st.sidebar:
     spec = MODELS_BY_KEY[selected_key]
 
     # --- Ajustes de execução (afetam a medição, por isso vêm antes do load) ---
-    with st.expander("⚙️ Ajustes", expanded=False):
-        n_threads = st.slider("Threads de CPU", 1, max(os.cpu_count() or 2, 2), min(2, os.cpu_count() or 2))
+        with st.expander("⚙️ Ajustes", expanded=False):
+        n_threads = st.slider(
+            "Threads de CPU", 1, max(os.cpu_count() or 2, 2), min(2, os.cpu_count() or 2),
+            help="Quantas threads de CPU o llama.cpp usa para gerar. Mais threads aceleram até o número de núcleos "
+                 "físicos; acima disso costumam piorar. Alterar recarrega o modelo e refaz a medição de RAM.",
+        )
         use_mmap = st.toggle(
             "Usar mmap",
             value=True,
             help="Ligado: o SO carrega o arquivo sob demanda (RAM sobe aos poucos). "
-                 "Desligado: o modelo inteiro é copiado para a RAM ao carregar, e a medição reflete o custo real.",
+                 "Desligado: o modelo inteiro é copiado para a RAM ao carregar, e a medição reflete o custo real. "
+                 "Alterar recarrega o modelo.",
         )
-        temperature = st.slider("Temperatura", 0.0, 1.5, 0.7, 0.05)
-        max_tokens = st.slider("Máx. de tokens", 50, 600, 250, 25)
-        max_msg_history = st.slider("Max message history", 1, 10, 5, 1)
+        temperature = st.slider(
+            "Temperatura", 0.0, 1.5, 0.45, 0.05,
+            help="Aleatoriedade das respostas. 0 = sempre escolhe o token mais provável (determinístico, ideal para "
+                 "comparar modelos). Valores altos deixam as respostas mais variadas, e mais sujeitas a erros.",
+        )
+        max_tokens = st.slider(
+            "Máx. de tokens", 50, 600, 350, 25,
+            help="Limite de tokens por resposta. Conta o raciocínio (<pensamento>) e a resposta final juntos: "
+                 "se for baixo, a resposta é cortada (aparece “cortada no limite de tokens”). "
+                 "Na avaliação dos modelos foi usado 512.",
+        )
+        max_msg_history = st.slider(
+            "Max message history", 1, 10, 1, 1,
+            help="Quantas mensagens recentes da conversa (suas e do modelo) são reenviadas a cada pergunta. "
+                 "O modelo não guarda memória: o app reenvia esse histórico. Valores maiores dão mais contexto, "
+                 "mas ocupam a janela de 2048 tokens e deixam a resposta mais lenta.",
+        )
 
     # --- Ficha do modelo -----------------------------------------------------
     on_disk = spec.path.exists()
@@ -706,6 +746,7 @@ with st.sidebar:
                 manager.load(spec, n_threads, use_mmap)
 
     # --- Métricas do modelo ativo --------------------------------------------
+        # --- Métricas do modelo ativo --------------------------------------------
     if manager.llm is not None and manager.spec is not None and manager.spec.key == spec.key:
         s = manager.stats
         st.markdown("### 📊 Monitoramento")
@@ -715,9 +756,18 @@ with st.sidebar:
                 ("RAM antes do modelo", f"{s['ram_before']:,.0f} MB", ""),
                 ("RAM do modelo", f"{s['ram_model']:,.0f} MB", "hot"),
                 ("RAM atual (app + modelo)", f"{rss_mb():,.0f} MB", "cool"),
+                ("Parâmetros", f"{s['n_params'] / 1e6:,.0f} M" if s["n_params"] else "n/d", ""),
+                ("Bits por peso (real)", f"{s['bits_per_weight']:.2f}" if s["bits_per_weight"] else "n/d", ""),
             ]),
             unsafe_allow_html=True,
         )
+        if s["format_ok"]:
+            st.caption(f"✔️ Formato verificado no arquivo GGUF: {s['file_type']}.")
+        else:
+            st.error(f"⚠️ O arquivo é {s['file_type']}, mas o catálogo diz {spec.short_fmt}. Confira o id do Drive.")
+        if s["default_system"]:
+            st.caption("O template de chat deste modelo insere o system prompt padrão do Qwen (“You are Qwen…”) "
+                       "quando nenhum é enviado.")
         if s["mmap"]:
             st.caption("Com mmap, parte do modelo só entra na RAM quando é usada. "
                        "O valor “atual” sobe depois das primeiras respostas.")
@@ -776,7 +826,7 @@ else:
 if view == VIEW_AVAL:
     render_avaliacao(spec)
     st.stop()
-    
+
 # Sem arquivo local não há o que conversar ainda.
 if not spec.path.exists() or manager.llm is None:
     st.info("👈 Escolha um modelo na barra lateral e baixe-o para começar a conversar.")
@@ -786,44 +836,88 @@ if not spec.path.exists() or manager.llm is None:
 # =============================================================================
 # 5. CHAT
 # =============================================================================
+FORMAT_STATUS_PT = {
+    "ok": "CoT ok", "sem_tags": "sem pensamento", "nao_fechado": "pensamento não fechado",
+    "so_fechamento": "tag de fechamento solta", "tag_duplicada": "pensamento repetido",
+    "ordem_invertida": "tags fora de ordem", "texto_antes_do_pensamento": "texto antes do pensamento",
+    "resposta_vazia": "sem resposta final",
+}
+
+
+def classify_format(text: str) -> str:
+    """Classifica o formato <pensamento>…</pensamento> + resposta final."""
+    o, c = text.count(OPEN), text.count(CLOSE)
+    if o == 0 and c == 0:
+        return "sem_tags"
+    if o == 0:
+        return "so_fechamento"
+    if c == 0:
+        return "nao_fechado"
+    if o > 1 or c > 1:
+        return "tag_duplicada"
+    if text.index(CLOSE) < text.index(OPEN):
+        return "ordem_invertida"
+    if text[:text.index(OPEN)].strip():
+        return "texto_antes_do_pensamento"
+    return "ok" if text.split(CLOSE, 1)[1].strip() else "resposta_vazia"
+
+
+def split_thought(text: str) -> tuple[str, str]:
+    """(pensamento, resposta final), com tolerância a formatos quebrados."""
+    if CLOSE in text:
+        before, after = text.rsplit(CLOSE, 1)
+        return before.replace(OPEN, "").strip(), after.strip()
+    if OPEN in text:
+        return text.split(OPEN, 1)[1].strip(), ""
+    return "", text.strip()
+
+
 def render_message(content: str, meta: dict | None = None) -> None:
-    """Mostra a resposta; <pensamento>…</pensamento> vai para um expander."""
-    
-    thoughts = re.findall(r"<pensamento>(.*?)</pensamento>", content, flags=re.DOTALL)
-    answer = re.sub(r"<pensamento>.*?</pensamento>", "", content, flags=re.DOTALL).strip()
+    """Mostra a resposta; o pensamento vai para um expander e falhas de formato viram avisos."""
+    meta = meta or {}
+    thought, answer = split_thought(content)
+    status = meta.get("format") or classify_format(content)
+    finish = meta.get("finish")
 
-    if thoughts:
+    if thought:
         with st.expander("🧠 Cadeia de pensamento"):
-            for t in thoughts:
-                st.markdown(f'<div class="cot-box">{html.escape(t.strip())}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="cot-box">{html.escape(thought)}</div>', unsafe_allow_html=True)
 
-    st.markdown(answer or content)
+    if answer:
+        st.markdown(answer)
+    elif thought:
+        motivo = "A resposta foi cortada no limite de tokens." if finish == "length" else "O modelo parou sozinho antes de responder."
+        st.warning(f"O modelo pensou, mas não escreveu a resposta final. {motivo}")
+    else:
+        st.caption("(resposta vazia)")
 
     if meta:
-        chips = (
-            f'<span class="meta-chip">{html.escape(meta["model"])}</span>'
-            f'<span class="meta-chip">{meta["tokens"]} tokens</span>'
-            f'<span class="meta-chip">{meta["tps"]:.1f} tok/s</span>'
-            f'<span class="meta-chip">{meta["secs"]:.1f} s</span>'
-        )
-        st.markdown(chips, unsafe_allow_html=True)
+        chips = [f'<span class="meta-chip">{html.escape(meta["model"])}</span>',
+                 f'<span class="meta-chip">{meta["tokens"]} tokens</span>']
+        if meta.get("tps"):
+            chips.append(f'<span class="meta-chip">{meta["tps"]:.1f} tok/s</span>')
+        if meta.get("ttft"):
+            chips.append(f'<span class="meta-chip">1º token em {meta["ttft"]:.2f} s</span>')
+        chips.append(f'<span class="meta-chip">{meta["secs"]:.1f} s</span>')
+        chips.append(f'<span class="meta-chip{"" if status == "ok" else " warn"}">{FORMAT_STATUS_PT.get(status, status)}</span>')
+        if finish == "length":
+            chips.append('<span class="meta-chip warn">cortada no limite de tokens</span>')
+        st.markdown("".join(chips), unsafe_allow_html=True)
 
+    history: list = histories.setdefault(spec.key, [])  # conversa separada por modelo
 
-histories: dict = st.session_state.setdefault("histories", {})
-history: list = histories.setdefault(spec.key, [])  # conversa separada por modelo
+    for msg in history:
+        avatar = "🧒" if msg["role"] == "user" else "🤖"
+        with st.chat_message(msg["role"], avatar=avatar):
+            if msg["role"] == "assistant":
+                render_message(msg["content"], msg.get("meta"))
+            else:
+                st.markdown(msg["content"])
 
-for msg in history:
-    avatar = "🧒" if msg["role"] == "user" else "🤖"
-    with st.chat_message(msg["role"], avatar=avatar):
-        if msg["role"] == "assistant":
-            render_message(msg["content"], msg.get("meta"))
-        else:
-            st.markdown(msg["content"])
-
-if prompt := st.chat_input("Digite sua perguntinha aqui…"):
-    history.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar="🧒"):
-        st.markdown(prompt)
+    if prompt := st.chat_input("Digite sua perguntinha aqui…"):
+        history.append({"role": "user", "content": prompt})
+        with st.chat_message("user", avatar="🧒"):
+            st.markdown(prompt)
 
     # Só role/content vão para o modelo (o campo "meta" fica de fora)
     llm_messages = [{"role": m["role"], "content": m["content"]} for m in history[-max_msg_history:]]
@@ -837,8 +931,8 @@ if prompt := st.chat_input("Digite sua perguntinha aqui…"):
         placeholder = st.empty()
         placeholder.markdown(f"{palavra_escolhida}… 🤔")
 
-        text, n_tokens = "", 0
-        start = time.perf_counter()
+        text, finish, t_first = "", None, None
+        t_start = time.perf_counter()
         with manager.gen_lock:
             stream = manager.llm.create_chat_completion(
                 messages=llm_messages,
@@ -847,19 +941,27 @@ if prompt := st.chat_input("Digite sua perguntinha aqui…"):
                 stream=True,
             )
             for chunk in stream:
-                delta = chunk["choices"][0]["delta"].get("content")
+                ch = chunk["choices"][0]
+                delta = (ch.get("delta") or {}).get("content")
                 if delta:
+                    if t_first is None:
+                        t_first = time.perf_counter()
                     text += delta
-                    n_tokens += 1
-                    placeholder.markdown(text + "▌")
-        elapsed = time.perf_counter() - start
+                    placeholder.markdown(text.replace(OPEN, "💭 *pensando:* ").replace(CLOSE, "\n\n---\n\n") + "▌")
+                if ch.get("finish_reason"):
+                    finish = ch["finish_reason"]       # "stop" = terminou sozinho; "length" = cortada no limite
+        t_end = time.perf_counter()
 
+        n_tokens = len(manager.llm.tokenize(text.encode("utf-8"), add_bos=False)) if text else 0   # contagem real
         text = text.strip()
         meta = {
             "model": spec.label,
             "tokens": n_tokens,
-            "secs": elapsed,
-            "tps": n_tokens / elapsed if elapsed > 0 else 0.0,
+            "secs": t_end - t_start,
+            "ttft": (t_first - t_start) if t_first else None,
+            "tps": (n_tokens - 1) / (t_end - t_first) if t_first and n_tokens > 1 and t_end > t_first else None,  # só decodificação
+            "finish": finish,
+            "format": classify_format(text),
         }
         placeholder.empty()
         render_message(text, meta)
