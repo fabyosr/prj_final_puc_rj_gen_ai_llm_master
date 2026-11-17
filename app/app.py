@@ -766,9 +766,7 @@ with st.sidebar:
             st.caption(f"✔️ Formato verificado no arquivo GGUF: {s['file_type']}.")
         else:
             st.error(f"⚠️ O arquivo é {s['file_type']}, mas o catálogo diz {spec.short_fmt}. Confira o id do Drive.")
-        if s.get("default_system"):
-            st.caption("O template de chat deste modelo insere o system prompt padrão do Qwen (“You are Qwen…”) "
-                       "quando nenhum é enviado.")
+        
         if s["mmap"]:
             st.caption("Com mmap, parte do modelo só entra na RAM quando é usada. "
                        "O valor “atual” sobe depois das primeiras respostas.")
