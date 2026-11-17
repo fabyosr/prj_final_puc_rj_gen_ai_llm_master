@@ -748,6 +748,7 @@ with st.sidebar:
     # --- Métricas do modelo ativo --------------------------------------------
     if manager.llm is not None and manager.spec is not None and manager.spec.key == spec.key:
         s = manager.stats
+        n_params, bpw = s.get("n_params"), s.get("bits_per_weight")   # .get: tolera estatísticas de um carregamento antigo
         st.markdown("### 📊 Monitoramento")
         st.markdown(
             tiles([
@@ -755,16 +756,18 @@ with st.sidebar:
                 ("RAM antes do modelo", f"{s['ram_before']:,.0f} MB", ""),
                 ("RAM do modelo", f"{s['ram_model']:,.0f} MB", "hot"),
                 ("RAM atual (app + modelo)", f"{rss_mb():,.0f} MB", "cool"),
-                ("Parâmetros", f"{s['n_params'] / 1e6:,.0f} M" if s["n_params"] else "n/d", ""),
-                ("Bits por peso (real)", f"{s['bits_per_weight']:.2f}" if s["bits_per_weight"] else "n/d", ""),
+                ("Parâmetros", f"{n_params / 1e6:,.0f} M" if n_params else "n/d", ""),
+                ("Bits por peso (real)", f"{bpw:.2f}" if bpw else "n/d", ""),
             ]),
             unsafe_allow_html=True,
         )
-        if s["format_ok"]:
+        if "file_type" not in s:
+            st.caption("Dados do arquivo GGUF indisponíveis neste carregamento. Troque de modelo ou altere as threads para recarregar.")
+        elif s["format_ok"]:
             st.caption(f"✔️ Formato verificado no arquivo GGUF: {s['file_type']}.")
         else:
             st.error(f"⚠️ O arquivo é {s['file_type']}, mas o catálogo diz {spec.short_fmt}. Confira o id do Drive.")
-        if s["default_system"]:
+        if s.get("default_system"):
             st.caption("O template de chat deste modelo insere o system prompt padrão do Qwen (“You are Qwen…”) "
                        "quando nenhum é enviado.")
         if s["mmap"]:
