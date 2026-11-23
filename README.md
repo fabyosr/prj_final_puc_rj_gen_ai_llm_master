@@ -7,7 +7,7 @@
 ![Modelos](https://img.shields.io/badge/Modelos%20comparados-14-34C79A)
 
 #### Aluno: [Fabyo Sousa Ramos](https://github.com/fabyosr)
-#### Orientador:
+#### Orientador: Dr. Leonardo Alfredo Forero Mendoza
 
 ---
 
